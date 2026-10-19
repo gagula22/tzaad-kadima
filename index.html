@@ -567,7 +567,7 @@ function vSayEx(){
 }
 function vCoach(){
   var C=V.coach,s=C.sit,r=C.r,N=s.bad.length,lang=s.lang,rtl=lang==='he-IL'?'':'dir="ltr" style="text-align:left"';
-  var h='<h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
+  var h='<button class="btn" data-a="coachback" style="min-height:40px;margin-bottom:10px">→ חזרה</button><h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
   if(C.ph==='done'){
     var avg=C.scores.length?Math.round(C.scores.reduce(function(a,b){return a+b},0)/C.scores.length):0;
     h+='<div class="card"><b>'+esc(g(COACH.done))+'</b><p style="margin:8px 0 0">התאמה ממוצעת לדרך החזקה: <b>'+avg+'%</b></p><div class="small" style="margin-top:6px">המדד מושווה לניסוחים המוצעים, ולכן ניסוח אחר שנשמע טוב עשוי לקבל ציון נמוך יותר.</div></div>'+
@@ -685,9 +685,10 @@ document.addEventListener('click',function(e){
   else if(a==='coachrec'){var cs=V.coach.sit;if(V.listening&&V.mode==='coach'){stopVoice()}else{listen(cs.lang,'coach',g(cs.good[0]));return}}
   else if(a==='coachsend'){var ci=document.getElementById('coachin'),tx=ci?ci.value.trim():'';stopVoice();
     if(!tx){V.said='';V.msg='כתבו או אמרו תשובה, ואז אפשר לקבל משוב.'}
-    else{var CC=V.coach;V.said=tx;V.msg='';CC.said=tx;CC.fb=coachFb(tx,CC.sit,CC.r);CC.scores.push(CC.fb.best);CC.ph='fb';
+    else{var CC=V.coach;V.said=tx;V.msg='';CC.said=tx;CC.fb=coachFb(tx,CC.sit,CC.r);CC.scores[CC.r]=CC.fb.best;CC.ph='fb';
       playSeq([cq(CC.fb.head),{aid:'coach-goodWay',t:g(COACH.goodWay),l:'he-IL'},{aid:CC.sit.gid[CC.fb.bi],t:g(CC.sit.good[CC.fb.bi]),l:CC.sit.lang}])}}
-  else if(a==='coachretry'){stopVoice();V.coach.scores.pop();V.coach.ph='ask';V.said=V.coach.said}
+  else if(a==='coachretry'){stopVoice();V.coach.ph='ask';V.said=V.coach.said}
+  else if(a==='coachback'){stopVoice();var C3=V.coach;V.msg='';if(C3.ph==='done'){C3.ph='ask';C3.r=C3.sit.bad.length-1;V.said=''}else if(C3.ph==='fb'){C3.ph='ask';V.said=C3.said}else if(C3.r>0){C3.r--;C3.ph='ask';V.said=''}else{V.coach=null;V.said=''}}
   else if(a==='coachnext'){stopVoice();var C2=V.coach;V.said='';V.msg='';if(C2.r<C2.sit.bad.length-1){C2.r++;C2.ph='ask';playSeq(coachSeq())}else{C2.ph='done'}}
   else if(a==='coachmore'){stopVoice();var cur=V.coach&&V.coach.k==='sx'?V.coach.i:V.sx;V.coach=null;var LM=sxList(),pm=LM.indexOf(cur);V.sx=LM[(pm+1)%LM.length];V.sayTab='ex';V.said=''}
   else if(a==='coachend'){stopVoice();V.coach=null;V.said='';V.msg=''}
