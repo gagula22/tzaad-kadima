@@ -201,7 +201,8 @@ var S=load()||{gender:'m',quizDone:false,quiz:[0,0,0,0],journey:'ch',done:{},str
   role:'beta',paySwitch:'off',betaEnd:addDays(14),extendedUntil:'',purchased:false,fee:'buyer'};
 function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-var V={tab:'home',lesson:null,step:0,answer:'',feedback:null,card:0,filter:'he',reveal:false,qi:0,plan:'h',method:'bit',notice:'',msg:'',listening:false,mode:'',said:'',score:null};
+var V={tab:'home',lesson:null,step:0,answer:'',feedback:null,card:0,filter:'he',reveal:false,qi:0,plan:'h',method:'bit',notice:'',msg:'',listening:false,mode:'',said:'',score:null,sayTab:'ex',sx:0,sxl:'he',coach:null};
+var seqTok=0;
 
 function hasAccess(){
   if(S.role==='owner'||S.purchased)return true;
@@ -315,7 +316,7 @@ function playClip(aid,t,l){
   var pr=a.play();if(pr&&pr.catch)pr.catch(function(){if(clip===a){clip=null;speak(t,l)}});
   return true;
 }
-function stopVoice(){if(clip){try{clip.pause()}catch(e){}clip=null}try{speechSynthesis.cancel()}catch(e){}if(rec){try{rec.onend=null;rec.onerror=null;rec.stop()}catch(e){}rec=null}V.listening=false}
+function stopVoice(){seqTok++;if(clip){try{clip.pause()}catch(e){}clip=null}try{speechSynthesis.cancel()}catch(e){}if(rec){try{rec.onend=null;rec.onerror=null;rec.stop()}catch(e){}rec=null}V.listening=false}
 function speak(t,l){
   if(!('speechSynthesis' in window)){V.msg='הדפדפן הזה לא תומך בהקראה.';return}
   stopVoice();
@@ -332,7 +333,7 @@ function listen(lang,mode,target){
   if(!SR){V.msg='הדפדפן הזה לא תומך בהקלטה והכתבה. מומלץ Chrome או Edge.';render();return}
   stopVoice();
   rec=new SR();rec.lang=lang;rec.interimResults=true;rec.continuous=(mode==='dict');
-  V.listening=true;V.mode=mode;V.msg='';if(mode==='card'){V.said='';V.score=null}
+  V.listening=true;V.mode=mode;V.msg='';if(mode!=='dict'){V.said='';V.score=null}
   if(mode==='dict'){var ta=document.getElementById('ans');V.answer=ta?ta.value:V.answer;dictBase=V.answer}
   rec.onresult=function(ev){
     var txt='';for(var i=0;i<ev.results.length;i++)txt+=ev.results[i][0].transcript+' ';
@@ -368,7 +369,7 @@ function vHome(){
   }else h+='<div class="hero"><h2 style="font-size:24px">סיימת את המסע</h2><div>כל השיעורים ב"'+j.name+'" הושלמו. אפשר לעבור למסע אחר.</div></div>';
   h+='<h2 style="font-size:18px">המסעות שלי</h2><div style="display:flex;flex-direction:column;gap:10px">';
   JOURNEYS.forEach(function(x){h+='<button class="card row" style="cursor:pointer;text-align:right;border-width:'+(x.id===S.journey?'2px':'1px')+';border-color:'+(x.id===S.journey?'var(--accent)':'var(--line)')+'" data-a="journey" data-id="'+x.id+'"><span class="grow"><b>'+x.name+'</b><div class="small">'+x.blurb+'</div><div class="small">'+doneCount(x)+' מתוך '+x.lessons.length+' שיעורים</div></span><span class="status s-wait">'+x.stage+'</span></button>'});
-  h+='</div><button class="card row" style="cursor:pointer;text-align:right" data-a="tab" data-id="say"><span style="color:var(--warm)">'+ic('chat')+'</span><span class="grow"><b>תגיד את זה נכון</b><div class="small">'+CARDS.length+' ניסוחים לתרגול</div></span></button>';
+  h+='</div><button class="card row" style="cursor:pointer;text-align:right" data-a="tab" data-id="say"><span style="color:var(--warm)">'+ic('chat')+'</span><span class="grow"><b>תגיד את זה נכון</b><div class="small">'+sxTotal()+' לתרגול</div></span></button>';
   return '<main>'+h+'</main>';
 }
 function pendingNotice(){return '<div class="notice"><b>החשבון ממתין לרכישה</b><div style="margin-top:4px">התוכן נעול, אבל החשבון וההתקדמות שמורים. אחרי הרכישה הכול חוזר מיד.</div><button class="btn primary" style="margin-top:10px" data-a="tab" data-id="me">לדף המחיר</button></div>'}
@@ -428,7 +429,169 @@ function deepFb(jid,i){
   h+='<div class="card"><b>'+u('deepNext')+'</b><p style="margin:8px 0 0">'+esc(d.next[gk()==='f'?'f':'m'])+'</p></div>';
   return h;
 }
-function vSay(){
+/*SAYX-START*/
+var SAYX=[
+ {t:'להביע דעה בישיבה',ctx:'ישיבות בעבודה',tip:'דבר בעמדה ברורה ובעובדות, בלי להתנצל מראש.',
+  bad:[P('אני לא בטוח, אבל אולי...','אני לא בטוחה, אבל אולי...'),'זו סתם מחשבה, אל תתייחסו אליה','תתעלמו מזה, זה כנראה טיפשי'],
+  good:['ההמלצה שלי היא...','אני רואה את זה כך, ואסביר למה',P('הנתונים מצביעים על כיוון אחד, ואני מציע ללכת אליו','הנתונים מצביעים על כיוון אחד, ואני מציעה ללכת אליו')]},
+ {t:'לבקש העלאה בשכר',ctx:'שיחה עם המנהל',tip:'בקשה מבוססת על תוצאות ועל מספר, לא על התנצלות.',
+  bad:['אני יודע שהתקציב הדוק, אבל אולי אפשר קצת יותר?','לא נעים לי לבקש, אבל...','אם זה לא מפריע, אולי נדבר על שכר'],
+  good:['בשנה האחרונה הובלתי שני פרויקטים והגדלתי את התוצאות. אני רוצה לדבר על העלאה',P('אני רוצה לקבוע שיחה על התגמול שלי. הכנתי את הנימוקים','אני רוצה לקבוע שיחה על התגמול שלי. הכנתי את הנימוקים'),P('בהתבסס על התוצאות שלי, אני מבקש העלאה של עשרה אחוזים','בהתבסס על התוצאות שלי, אני מבקשת העלאה של עשרה אחוזים')]},
+ {t:'לסרב לבקשה נוספת',ctx:'עומס בעבודה',tip:'סירוב מכבד כולל סיבה קצרה והצעה חלופית.',
+  bad:[P('אני אנסה, אבל אני לא מבטיח','אני אנסה, אבל אני לא מבטיחה'),'סליחה, אין לי זמן, אולי בפעם אחרת','אוף, שוב זה?'],
+  good:[P('אני לא יכול לקחת את זה כרגע. אפשר ביום חמישי','אני לא יכולה לקחת את זה כרגע. אפשר ביום חמישי'),P('כדי לעשות את זה טוב אני צריך עוד יומיים','כדי לעשות את זה טוב אני צריכה עוד יומיים'),P('כרגע אני עסוק בפרויקט אחר. מה הכי דחוף מבין השניים?','כרגע אני עסוקה בפרויקט אחר. מה הכי דחוף מבין השניים?')]},
+ {t:'לקבל מחמאה',ctx:'שיחה עם עמיתים',tip:'מחמאה מקבלים בתודה, בלי להקטין את עצמך.',
+  bad:['זה כלום, סתם מזל','לא עשיתי הרבה','כל אחד היה עושה את זה'],
+  good:['תודה, זה שימח אותי','תודה. השקעתי בזה הרבה','תודה רבה, אני גאה בתוצאה']},
+ {t:'לתת משוב לעובד',ctx:'שיחת משוב',tip:'משוב טוב מתאר מה קרה, בלי לשפוט את האדם.',
+  bad:['אתה לא ממש מקצועי','זה לא טוב','אתה תמיד מפספס פרטים'],
+  good:['בדוח האחרון היו שלוש טעויות בנתונים. בוא נבדוק יחד איך נמנע את זה','הרעיון חזק. כדי שיהיה מוכן חסרים שני דברים','אני רואה שאתה מסוגל ליותר. הנה מה שחסר לי בדוח']},
+ {t:'לבקש עזרה',ctx:'עבודה בצוות',tip:'בקשה ממוקדת עם זמן קצוב מקבלת תשובה מהר יותר.',
+  bad:[P('אני בטח מפריע, אבל...','אני בטח מפריעה, אבל...'),'אני לא רוצה להטריד, אבל...',P('תעזור לי, אני לא מבין כלום','תעזרי לי, אני לא מבינה כלום')],
+  good:[P('אני תקוע בשלב הזה. אפשר חמש דקות?','אני תקועה בשלב הזה. אפשר חמש דקות?'),'אתה מכיר את זה היטב. אשמח לעצה שלך','יש לי שאלה ממוקדת, זה ייקח שתי דקות']},
+ {t:'לדחות הזמנה',ctx:'חברים ומשפחה',tip:'תשובה ברורה וחמה עדיפה על תשובה מתחמקת.',
+  bad:['אולי, נראה, אני לא יודע',P('אני קצת עייף, סליחה','אני קצת עייפה, סליחה'),'יש לי המון דברים, לא בא לי'],
+  good:['תודה על ההזמנה, הפעם אוותר','אשמח, אבל לא אוכל. נקבע לשבוע הבא?','זה לא מתאים לי הפעם, תודה שחשבתם עליי']},
+ {t:'להציג את עצמך',ctx:'היכרות ורשתות קשרים',tip:'משפט אחד על הערך שאתה מביא, לא על מה שאתה לא.',
+  bad:['אני סתם עובד בחברה','אני לא מי יודע מה','קוראים לי דני, אני די חדש'],
+  good:[P('אני מנהל מכירות, ואוהב לפתור בעיות של לקוחות','אני מנהלת מכירות, ואוהבת לפתור בעיות של לקוחות'),'אני עוזר לחברות להגדיל מכירות','בשנתיים האחרונות הובלתי צוות של שישה אנשים']},
+ {t:'לא להסכים בכבוד',ctx:'ויכוח מקצועי',tip:'מתמקדים בעניין ובנתון, לא באדם.',
+  bad:['אתה טועה','זה לא יעבוד','זה לא הגיוני'],
+  good:['אני רואה סיכון אחד בתוכנית. הנה הוא','אשמח להבין איך זה יעבוד מול הלקוחות','יש לי נתון שמראה תמונה אחרת']},
+ {t:'לדבר על רגשות בזוגיות',ctx:'שיחה עם בן או בת זוג',tip:'מתארים מה קורה ומה מרגישים, ואז מבקשים משהו מסוים.',
+  bad:['אתה אף פעם לא מקשיב','את תמיד עסוקה','לא אכפת לך ממני'],
+  good:[P('כשאני מדבר והטלפון בידיים, אני מרגיש שלא שומעים אותי','כשאני מדברת והטלפון בידיים, אני מרגישה שלא שומעים אותי'),P('אני צריך עשר דקות של תשומת לב מלאה. מתי מתאים?','אני צריכה עשר דקות של תשומת לב מלאה. מתי מתאים?'),'חשוב לי שנדבר על זה. מתי נוח לך?']},
+ {t:'לענות על מה שלומך',ctx:'שיחת חולין',tip:'תשובה קצרה עם משהו אמיתי פותחת שיחה.',
+  bad:['בסדר, כרגיל, סתם','לא משהו','אין מה לספר'],
+  good:['מצוין, סיימתי השבוע פרויקט שהתרגשתי ממנו',P('טוב, ואתה? מה חדש אצלך?','טוב, ואת? מה חדש אצלך?'),P('יש לי הרבה על הראש, אבל אני מתקדם','יש לי הרבה על הראש, אבל אני מתקדמת')]},
+ {t:'לדבר על חולשות בראיון',ctx:'ראיון עבודה',tip:'חולשה אמיתית, ומה עשית כדי להשתפר.',
+  bad:['אני לא ממש טוב בדברים',P('אין לי הרבה ניסיון, אבל אני לומד מהר','אין לי הרבה ניסיון, אבל אני לומדת מהר'),'אין לי חולשות, אני מושלם'],
+  good:['למדתי לתעדף, כי פעם לקחתי על עצמי יותר מדי','יש לי ניסיון בפרויקטים קטנים, ואני רוצה לגדול','חולשה שעבדתי עליה היא האצלת סמכויות']},
+ {t:'לסגור עסקה',ctx:'מכירות ומשא ומתן',tip:'מסיימים בצעד הבא ברור ובמועד.',
+  bad:['אז... תחשבו על זה אולי','אין לחץ, מתי שנוח','אולי נדבר בהמשך?'],
+  good:['אז נסגור היום?','הצעד הבא הוא חתימה עד יום חמישי',P('אני שולח הסכם היום. מתי תוכל לחתום?','אני שולחת הסכם היום. מתי תוכל לחתום?')]},
+ {t:'לבקש הבהרה',ctx:'ישיבות והנחיות',tip:'שאלה מדויקת מראה מקצועיות, לא חולשה.',
+  bad:['סליחה שאני טיפש, לא הבנתי',P('אולי אני סתם לא מבין','אולי אני סתם לא מבינה'),'אני לא הבנתי כלום'],
+  good:['אני רוצה לוודא שהבנתי: אתה מבקש...','אפשר לשמוע את זה שוב, בקצרה?','מה הקריטריון להצלחה כאן?']},
+ {t:'להודות בטעות',ctx:'שגיאה בעבודה',tip:'אחריות, פתרון ולוח זמנים. בלי תירוצים.',
+  bad:['זו לא אשמתי','זה בגלל שלא הסבירו לי','לא ידעתי, תסלחו לי'],
+  good:[P('טעיתי, ואני כבר מתקן את זה','טעיתי, ואני כבר מתקנת את זה'),'הנה מה שקרה ומה שאעשה כדי שזה לא יחזור',P('אני לוקח אחריות. הפתרון יהיה מוכן עד מחר','אני לוקחת אחריות. הפתרון יהיה מוכן עד מחר')]},
+ {t:'להציב גבול',ctx:'יחסי עבודה וחברות',tip:'גבול נאמר פעם אחת, בקול רגוע ובלי הסברים ארוכים.',
+  bad:['זה בסדר, אין בעיה, אני אסתדר','לא נעים לי להגיד לא','טוב, נו, אם חייבים'],
+  good:[P('זה לא מתאים לי, ואני מעדיף שנסכם אחרת','זה לא מתאים לי, ואני מעדיפה שנסכם אחרת'),P('אני לא זמין אחרי שש בערב','אני לא זמינה אחרי שש בערב'),P('אני מבין שזה חשוב לך, ובכל זאת התשובה היא לא','אני מבינה שזה חשוב לך, ובכל זאת התשובה היא לא')]},
+ {t:'לפתוח מצגת',ctx:'דיבור מול קהל',tip:'פותחים בהבטחה או בשאלה, לא בהתנצלות.',
+  bad:['אז... אממ... אני אתחיל, אם אפשר','זה לא ממש מעניין, אבל...','סליחה, אני לא טוב בזה'],
+  good:['בשלוש הדקות הקרובות תראו איך לחסוך שעה ביום','אתחיל בשאלה אחת','יש כאן רעיון אחד שישנה את הדרך שבה אתם עובדים']},
+ {t:'לבקש פידבק',ctx:'אחרי פרויקט',tip:'שאלה פתוחה ומדויקת מביאה תשובה שימושית.',
+  bad:['אני בטח עשיתי הכול לא נכון','תגיד לי שזה בסדר','נו, איך זה היה? גרוע?'],
+  good:[P('מה הדבר האחד שהייתי יכול לעשות טוב יותר?','מה הדבר האחד שהייתי יכולה לעשות טוב יותר?'),'מה עבד ומה כדאי לשפר?','אשמח לשני דברים שעבדו ודבר אחד לשיפור']},
+ {t:'לשבח עמית',ctx:'הערכה בצוות',tip:'שבח ספציפי עם תוצאה, ולא רק מילה כללית.',
+  bad:['לא רע','בסדר גמור','יאללה, יפה'],
+  good:['העבודה הזו חסכה לנו יום שלם. תודה','ראיתי כמה השקעת. התוצאה מרשימה','הדרך שבה טיפלת בלקוח הייתה בדיוק מה שהצוות היה צריך']}
+];
+/*SAYX-END*/
+/*COACH-START*/
+var COACH={
+ intro:P('בוא נתרגל מצב חדש.','בואי נתרגל מצב חדש.'),
+ says:P('במצב כזה אנשים נוטים להגיד:','במצב כזה אנשים נוטים להגיד:'),
+ next:P('נעבור למצב דומה. הפעם אנשים אומרים:','נעבור למצב דומה. הפעם אנשים אומרים:'),
+ ask:P('איך תגיד את זה נכון?','איך תגידי את זה נכון?'),
+ fbStrong:P('מצוין. הניסוח שלך קרוב מאוד לדרך החזקה.','מצוין. הניסוח שלך קרוב מאוד לדרך החזקה.'),
+ fbOk:P('כיוון טוב, ויש מקום לחדד.','כיוון טוב, ויש מקום לחדד.'),
+ fbWeak:P('זו דרך אחרת. בוא נראה איך מחזקים אותה.','זו דרך אחרת. בואי נראה איך מחזקים אותה.'),
+ goodWay:P('הנה דרך חזקה להגיד את זה:','הנה דרך חזקה להגיד את זה:'),
+ done:P('סיימנו את התרגול. כל הכבוד.','סיימנו את התרגול. כל הכבוד.')
+};
+function sxList(){var r=[];SAYX.forEach(function(x,i){if((x.lg||'he')===V.sxl)r.push(i)});return r}
+function sxTotal(){var c=CARDS.length,x=0;SAYX.forEach(function(s){x+=s.good.length});return SAYX.length+CARDS.length+' מצבים · '+(x+c)+' ניסוחים'}
+function sxId(n,k,i){return 'sx-'+(n+1)+'-'+k+(i+1)}
+function sitFromSx(n){var s=SAYX[n];return {t:s.t,ctx:s.ctx,tip:s.tip,bad:s.bad,good:s.good,lang:(s.lg==='en'||s.lg==='il')?'en-US':'he-IL',
+  bid:s.bad.map(function(x,i){return sxId(n,'b',i)}),gid:s.good.map(function(x,i){return sxId(n,'g',i)})}}
+function sitFromCard(c){var p='card-'+('00'+(CARDS.indexOf(c)+1)).slice(-3);return {t:c.ctx,ctx:c.ctx,tip:'ניסוח חזק מדגיש '+c.tag+'.',bad:[c.bad],good:[c.good],lang:c.tr==='he'?'he-IL':'en-US',bid:[p+'-bad'],gid:[p+'-good']}}
+function cq(k){return {aid:'coach-'+k,t:g(COACH[k]),l:'he-IL'}}
+function coachSeq(){var C=V.coach,s=C.sit,r=C.r;
+  return [cq(r?'next':'intro')].concat(r?[]:[cq('says')]).concat([{aid:s.bid[r],t:g(s.bad[r]),l:s.lang},cq('ask')])}
+function coachFb(said,s,r){
+  var w=norm(said),sims=s.good.map(function(x){return similarity(g(x),said)}),best=Math.max.apply(null,sims),bi=sims.indexOf(best);
+  var simBad=similarity(g(s.bad[r]),said);
+  var hedges=['אולי','קצת','סליחה','סתם','בטח','נראה לי','לא בטוח','לא בטוחה','maybe','sorry','i think','kind of','sort of','just'].filter(function(h){return said.toLowerCase().indexOf(h)>-1});
+  var X=function(m,f){return g(P(m,f))},lines=[];
+  if(simBad>=70)lines.push(X('זה קרוב למשפט שרצינו להחליף. נסה להתחיל במה שאתה רוצה לומר, ולא במה שאתה מתנצל עליו.','זה קרוב למשפט שרצינו להחליף. נסי להתחיל במה שאת רוצה לומר, ולא במה שאת מתנצלת עליו.'));
+  if(hedges.length)lines.push('המילה "'+hedges[0]+'" מחלישה את המסר. '+X('נסה לומר את זה בלעדיה.','נסי לומר את זה בלעדיה.'));
+  if(w.length<3)lines.push(X('הניסוח קצר מאוד. הוסף פרט אחד: מה, מתי או כמה.','הניסוח קצר מאוד. הוסיפי פרט אחד: מה, מתי או כמה.'));
+  else if(w.length>28)lines.push('הניסוח ארוך. משפט אחד או שניים מספיקים כדי שישמעו אותך.');
+  if(!lines.length)lines.push('אין כאן מילים שמחלישות את המסר, וזה חשוב.');
+  return {head:best>=60?'fbStrong':best>=30?'fbOk':'fbWeak',lines:lines,best:best,bi:bi};
+}
+function pickVoice(l){var vs=[];try{vs=speechSynthesis.getVoices()}catch(e){}var p=l.slice(0,2).toLowerCase();return vs.filter(function(x){return x.lang.replace('_','-').toLowerCase().indexOf(p)===0})[0]}
+function speakThen(it,done){
+  if(!('speechSynthesis' in window)){done();return}
+  var ut=new SpeechSynthesisUtterance('… '+it.t);ut.lang=it.l||'he-IL';ut.rate=.95;var v=pickVoice(ut.lang);if(v)ut.voice=v;
+  ut.onend=done;ut.onerror=done;setTimeout(function(){try{speechSynthesis.speak(ut)}catch(e){done()}},250);
+}
+function playOne(it,done){
+  try{speechSynthesis.cancel()}catch(e){}
+  if(it.aid&&AUDIO[it.aid]){
+    var a=new Audio('audio/'+AUDIO[it.aid][gk()==='f'?1:0]);clip=a;
+    var fall=function(){if(clip===a){clip=null;speakThen(it,done)}};
+    a.onended=function(){if(clip===a){clip=null;done()}};a.onerror=fall;
+    var pr=a.play();if(pr&&pr.catch)pr.catch(fall);
+  }else speakThen(it,done);
+}
+function playSeq(items){
+  stopVoice();var tok=++seqTok,i=0;
+  (function nx(){if(tok!==seqTok||i>=items.length)return;var it=items[i++];playOne(it,function(){if(tok===seqTok)setTimeout(nx,350)})})();
+}
+function sayTabs(){return '<div class="seg" style="margin-bottom:12px">'+[['ex','דוגמאות'],['pr','תרגול כרטיסים']].map(function(x){return '<button class="chip" data-a="saytab" data-id="'+x[0]+'" aria-pressed="'+(V.sayTab===x[0]&&!V.coach)+'">'+x[1]+'</button>'}).join('')+'</div>'}
+function lineRow(text,kind,aid,lang){
+  var ltr=lang!=='he-IL';
+  return '<div class="row" style="gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line,rgba(128,128,128,.25))"><span class="grow '+(kind==='bad'?'say-bad':'')+'" '+(ltr?'dir="ltr" ':'')+'style="'+(ltr?'text-align:left;':'')+(kind==='good'?'font-weight:700;font-size:18px;':'font-size:18px;')+'">'+esc(text)+'</span>'+
+   '<button class="btn" data-a="speak" data-t="'+esc(text)+'" data-l="'+lang+'" data-aid="'+aid+'" aria-label="הקראה" style="min-height:40px;padding:0 12px">'+ic('vol',18)+'</button></div>';
+}
+function vSayEx(){
+  var L=sxList(),langs=[['he','עברית'],['en','אנגלית'],['il','אנגלית של ישראלים']];
+  if(!L.length)return '<div class="seg" style="margin-bottom:10px">'+langs.map(function(x){return '<button class="chip" data-a="sxlang" data-id="'+x[0]+'" aria-pressed="'+(V.sxl===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><div class="notice">הדוגמאות בשפה הזו יתווספו בקרוב.</div>';
+  var n=L.indexOf(V.sx)>-1?V.sx:L[0],s=sitFromSx(n),pos=L.indexOf(n)+1;
+  var h='<div class="seg" style="margin-bottom:10px">'+langs.map(function(x){return '<button class="chip" data-a="sxlang" data-id="'+x[0]+'" aria-pressed="'+(V.sxl===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
+  h+='<details style="margin-bottom:10px"><summary class="btn" style="width:100%;cursor:pointer">בחירת מצב מתוך '+L.length+'</summary><div class="row wrap" style="gap:6px;margin-top:8px">'+L.map(function(gi,k){return '<button class="chip" data-a="sxpick" data-i="'+gi+'" aria-pressed="'+(gi===n)+'" style="font-size:13px">'+(k+1)+'. '+esc(SAYX[gi].t)+'</button>'}).join('')+'</div></details>';
+  h+='<div class="small">'+esc(s.ctx)+' · מצב '+pos+' מתוך '+L.length+'</div><h2 style="margin:4px 0 10px;font-size:20px">'+esc(s.t)+'</h2>';
+  h+='<div class="card"><div class="small"><b>'+(V.sxl==='il'?'הגרסה השגויה':'במקום להגיד')+'</b></div>'+s.bad.map(function(x,i){return lineRow(g(x),'bad',s.bid[i],s.lang)}).join('')+'</div>';
+  h+='<div class="card" style="border-color:var(--accent)"><div class="small"><b>'+(V.sxl==='il'?'הגרסה הנכונה':u('say'))+'</b></div>'+s.good.map(function(x,i){return lineRow(g(x),'good',s.gid[i],s.lang)}).join('')+'</div>';
+  h+='<div class="notice" role="note"><b>הרעיון:</b> '+esc(s.tip)+'</div>';
+  h+='<div class="row wrap"><button class="btn" data-a="sxall">'+ic('vol',18)+' הקראת הכול</button><button class="btn" data-a="sxnext">מצב הבא</button></div>';
+  h+='<button class="btn primary" data-a="coachstart" data-k="sx" data-i="'+n+'" style="width:100%;margin-top:10px">'+ic('chat')+' שיחה עם מאמן</button>';
+  return h;
+}
+function vCoach(){
+  var C=V.coach,s=C.sit,r=C.r,N=s.bad.length,lang=s.lang,rtl=lang==='he-IL'?'':'dir="ltr" style="text-align:left"';
+  var h='<h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
+  if(C.ph==='done'){
+    var avg=C.scores.length?Math.round(C.scores.reduce(function(a,b){return a+b},0)/C.scores.length):0;
+    h+='<div class="card"><b>'+esc(g(COACH.done))+'</b><p style="margin:8px 0 0">התאמה ממוצעת לדרך החזקה: <b>'+avg+'%</b></p><div class="small" style="margin-top:6px">המדד מושווה לניסוחים המוצעים, ולכן ניסוח אחר שנשמע טוב עשוי לקבל ציון נמוך יותר.</div></div>'+
+     '<div class="row wrap"><button class="btn" data-a="coachstart" data-k="'+C.k+'" data-i="'+C.i+'">תרגול נוסף באותו מצב</button><button class="btn primary" data-a="coachmore">מצב הבא</button></div><button class="btn" data-a="coachend" style="width:100%;margin-top:8px">חזרה</button>';
+    return h;
+  }
+  h+='<div class="card" style="border-inline-start:5px solid var(--accent)"><div class="small"><b>המאמן</b></div><p style="margin:6px 0">'+esc(g(COACH[r?'next':'intro']))+(r?'':' '+esc(g(COACH.says)))+'</p>'+
+   '<div class="say-bad" '+rtl+'>'+esc(g(s.bad[r]))+'</div><p style="margin:8px 0 0"><b>'+esc(g(COACH.ask))+'</b></p>'+
+   '<div class="row wrap" style="margin-top:8px"><button class="btn" data-a="coachplay">'+ic('vol',18)+' השמע את המאמן</button>'+spk(g(s.bad[r]),lang,'הקרא "במקום להגיד"',s.bid[r])+'</div></div>';
+  if(C.ph==='ask'){
+    var on=V.listening&&V.mode==='coach';
+    h+='<div class="card"><b>התשובה שלך</b><div class="small">אפשר לדבר או להקליד.</div>'+
+     (IOS?'':'<button class="btn '+(on?'dark':'primary')+'" data-a="coachrec" style="margin-top:10px;width:100%">'+ic('mic')+' '+(on?u('stopRec'):u('rec'))+'</button>')+
+     '<label class="small" for="coachin" style="display:block;margin-top:10px">התשובה (נכתבת כאן גם בהקלטה)</label><textarea id="coachin" rows="3" '+rtl+' style="width:100%">'+esc(V.said)+'</textarea>'+
+     '<button class="btn primary" data-a="coachsend" style="margin-top:10px;width:100%">'+g(P('קבל משוב מהמאמן','קבלי משוב מהמאמן'))+'</button></div>'+(V.msg?'<div class="notice" role="status">'+V.msg+'</div>':'');
+  }else{
+    var f=C.fb;
+    h+='<div class="card"><div class="small">התשובה שלך</div><p style="margin:6px 0" '+rtl+'>'+esc(C.said)+'</p><div class="small">התאמה לדרך החזקה הקרובה: <b>'+f.best+'%</b></div></div>'+
+     '<div class="card" style="border-inline-start:5px solid var(--accent)"><div class="small"><b>המאמן</b></div><p style="margin:6px 0"><b>'+esc(g(COACH[f.head]))+'</b></p><ul style="margin:0;padding-inline-start:20px">'+f.lines.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><p style="margin:8px 0 0" class="small"><b>הרעיון:</b> '+esc(s.tip)+'</p></div>'+
+     '<div class="card" style="border-color:var(--accent)"><div class="small"><b>'+esc(g(COACH.goodWay))+'</b></div>'+s.good.map(function(x,i){return lineRow(g(x),'good',s.gid[i],lang)}).join('')+'</div>'+
+     '<div class="row wrap"><button class="btn" data-a="coachretry">'+g(P('נסה שוב','נסי שוב'))+'</button><button class="btn primary grow" data-a="coachnext">'+(r<N-1?'המשך לסבב הבא':'סיום')+'</button></div>';
+  }
+  return h+'<button class="btn" data-a="coachend" style="width:100%;margin-top:8px">יציאה מהשיחה</button>';
+}
+/*COACH-END*/
+
+function vSayPr(){
   if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
   var list=CARDS.filter(function(c){return c.tr===V.filter});if(V.card>=list.length)V.card=0;var c=list[V.card],id=c.k;
   var saved=S.saved.indexOf(id)>-1;
@@ -439,13 +602,21 @@ function vSay(){
   if(V.reveal)h+='<div class="say-good"><div class="small" style="color:inherit;opacity:.9">'+u('say')+'</div><b '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'>'+esc(g(c.good))+'</b><span class="status" style="background:rgba(255,255,255,.2);align-self:flex-start">משדר: '+esc(c.tag)+'</span></div>';
   else h+='<button class="btn primary" data-a="reveal">'+u('reveal')+'</button>';
   var lang=c.tr==='he'?'he-IL':'en-US',on=V.listening&&V.mode==='card';
-  h+='<div class="row wrap">'+spk(g(c.good),lang,u('readGood'),'card-'+('00'+(CARDS.indexOf(c)+1)).slice(-3)+'-good')+'</div>'+
+  var cid='card-'+('00'+(CARDS.indexOf(c)+1)).slice(-3);
+  h+='<div class="row wrap">'+spk(g(c.bad),lang,'הקרא את "במקום להגיד"',cid+'-bad')+spk(g(c.good),lang,u('readGood'),cid+'-good')+'</div>'+
+   '<button class="btn" data-a="coachstart" data-k="card" data-i="'+CARDS.indexOf(c)+'" style="width:100%">'+ic('chat')+' שיחה עם מאמן</button>'+
    '<div class="card"><div class="row"><span style="color:var(--warm)">'+ic('mic')+'</span><span class="grow"><b>'+u('sayAloud')+'</b><div class="small">'+u('saySub')+'</div></span></div>'+
    (IOS?'<div class="notice" role="note" style="margin-top:10px">'+u('iosSay')+'</div><label class="small" for="saidin" style="display:block;margin-top:8px">מה אמרת</label><input type="text" id="saidin" value="'+esc(V.said)+'" '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'><button class="btn primary" data-a="check" style="margin-top:10px;width:100%">'+u('check')+'</button>':'<button class="btn '+(on?'dark':'primary')+'" data-a="say" style="margin-top:10px;width:100%">'+(on?u('stopRec'):u('rec'))+'</button>')+
    (V.said||on?'<div style="margin-top:10px"><div class="small">מה שאמרת</div><div id="said" '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'>'+esc(V.said)+'</div>'+(V.score!==null&&!on?'<div class="small" style="margin-top:6px">התאמה למשפט: <b>'+V.score+'%</b>'+(V.score>=80?' מצוין.':V.score>=50?u('near'):u('low'))+'</div>':'')+'</div>':'')+'</div>'+
    (V.msg?'<div class="notice" role="status">'+V.msg+'</div>':'')+
    '<div class="row"><button class="btn grow" data-a="save">'+(saved?'נשמר לחזרה':u('saveCard'))+'</button><button class="btn dark grow" data-a="nextcard">הבא</button></div>';
   return '<main>'+h+'</main>';
+}
+function vSay(){
+  if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
+  if(V.coach)return '<main>'+vCoach()+'</main>';
+  if(V.sayTab==='ex')return '<main><h1 style="font-size:24px">'+u('sayTitle')+'</h1>'+sayTabs()+vSayEx()+'</main>';
+  return vSayPr().replace('</h1>','</h1>'+sayTabs());
 }
 function vMe(){
   var acc=hasAccess(),t=today();
@@ -487,7 +658,7 @@ document.addEventListener('click',function(e){
   var b=e.target.closest('[data-a]');if(!b)return;
   var a=b.dataset.a,id=b.dataset.id,i=+b.dataset.i;
   if(a==='pick'){S.quiz[V.qi]=i;if(V.qi===0)S.gender=i===0?'m':'f';if(V.qi===1)S.journey=['ch','th','br','tr','ld'][i];V.qi++;if(V.qi>=4){S.quizDone=true;V.qi=0}save()}
-  else if(a==='tab'){stopVoice();V.said='';V.score=null;V.msg='';V.tab=id;V.lesson=null;V.notice=''}
+  else if(a==='tab'){stopVoice();V.coach=null;V.said='';V.score=null;V.msg='';V.tab=id;V.lesson=null;V.notice=''}
   else if(a==='journey'){S.journey=id;save()}
   else if(a==='start'){V.tab='lessons';V.lesson={j:S.journey,i:i};V.step=0;V.answer='';V.feedback=null;if(!hasAccess()){V.lesson=null}}
   else if(a==='open'){V.lesson={j:b.dataset.j,i:i};V.step=0;V.answer='';V.feedback=null}
@@ -501,6 +672,22 @@ document.addEventListener('click',function(e){
   else if(a==='reveal'){V.reveal=true}
   else if(a==='nextcard'){stopVoice();V.card++;V.reveal=false;V.said='';V.score=null;V.msg=''}
   else if(a==='save'){var l=CARDS.filter(function(c){return c.tr===V.filter})[V.card];var k=S.saved.indexOf(l.k);if(k>-1)S.saved.splice(k,1);else S.saved.push(l.k);save()}
+  else if(a==='saytab'){stopVoice();V.coach=null;V.sayTab=id;V.msg='';V.said=''}
+  else if(a==='sxpick'){stopVoice();V.sx=i}
+  else if(a==='sxlang'){stopVoice();V.sxl=id;V.sx=sxList()[0]||0}
+  else if(a==='sxnext'){stopVoice();var LL=sxList(),pp=LL.indexOf(V.sx);V.sx=LL[(pp+1)%LL.length]}
+  else if(a==='sxall'){var ss=sitFromSx(V.sx),its=[];ss.bad.forEach(function(x,k){its.push({aid:ss.bid[k],t:g(x),l:ss.lang})});ss.good.forEach(function(x,k){its.push({aid:ss.gid[k],t:g(x),l:ss.lang})});playSeq(its)}
+  else if(a==='coachstart'){var kk=b.dataset.k;V.coach={k:kk,i:i,sit:kk==='sx'?sitFromSx(i):sitFromCard(CARDS[i]),r:0,ph:'ask',scores:[],said:'',fb:null};V.said='';V.msg='';playSeq(coachSeq())}
+  else if(a==='coachplay'){playSeq(coachSeq())}
+  else if(a==='coachrec'){var cs=V.coach.sit;if(V.listening&&V.mode==='coach'){stopVoice()}else{listen(cs.lang,'coach',g(cs.good[0]));return}}
+  else if(a==='coachsend'){var ci=document.getElementById('coachin'),tx=ci?ci.value.trim():'';stopVoice();
+    if(!tx){V.said='';V.msg='כתבו או אמרו תשובה, ואז אפשר לקבל משוב.'}
+    else{var CC=V.coach;V.said=tx;V.msg='';CC.said=tx;CC.fb=coachFb(tx,CC.sit,CC.r);CC.scores.push(CC.fb.best);CC.ph='fb';
+      playSeq([cq(CC.fb.head),{aid:'coach-goodWay',t:g(COACH.goodWay),l:'he-IL'},{aid:CC.sit.gid[CC.fb.bi],t:g(CC.sit.good[CC.fb.bi]),l:CC.sit.lang}])}}
+  else if(a==='coachretry'){stopVoice();V.coach.scores.pop();V.coach.ph='ask';V.said=V.coach.said}
+  else if(a==='coachnext'){stopVoice();var C2=V.coach;V.said='';V.msg='';if(C2.r<C2.sit.bad.length-1){C2.r++;C2.ph='ask';playSeq(coachSeq())}else{C2.ph='done'}}
+  else if(a==='coachmore'){stopVoice();var cur=V.coach&&V.coach.k==='sx'?V.coach.i:V.sx;V.coach=null;var LM=sxList(),pm=LM.indexOf(cur);V.sx=LM[(pm+1)%LM.length];V.sayTab='ex';V.said=''}
+  else if(a==='coachend'){stopVoice();V.coach=null;V.said='';V.msg=''}
   else if(a==='plan'){V.plan=id}
   else if(a==='gender'){stopVoice();S.gender=id;save()}
   else if(a==='check'){var lc=CARDS.filter(function(c){return c.tr===V.filter})[V.card],iv=document.getElementById('saidin');V.said=iv?iv.value.trim():'';V.score=V.said?similarity(g(lc.good),V.said):null}
