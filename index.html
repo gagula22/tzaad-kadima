@@ -248,6 +248,18 @@ var U={
  fbHedge:P('המשפט שלך כולל ניסוח מהסס ("{w}"). נסה להחליף אותו בנוסח החלטי, למשל "ההמלצה שלי היא", ושמור על משפט אחד קצר.','המשפט שלך כולל ניסוח מהסס ("{w}"). נסי להחליף אותו בנוסח החלטי, למשל "ההמלצה שלי היא", ושמרי על משפט אחד קצר.'),
  fbLong:P('הניסוח ברור, אבל ארוך. קצר אותו למשפט אחד ופתח בתשובה.','הניסוח ברור, אבל ארוך. קצרי אותו למשפט אחד ופתחי בתשובה.'),
  fbGood:P('ניסוח חלק וחד. כדאי לומר אותו בקול פעם אחת לפני הישיבה.','ניסוח חלק וחד. כדאי לומר אותו בקול פעם אחת לפני הישיבה.'),
+ fbShort:P('התשובה קצרה מאוד. הוסף פרט אחד: מה בדיוק, מתי, או עם מי.','התשובה קצרה מאוד. הוסיפי פרט אחד: מה בדיוק, מתי, או עם מי.'),
+ fbSAct:P('יש בתשובה פעולה ברורה שאתה מתכנן לעשות.','יש בתשובה פעולה ברורה שאת מתכננת לעשות.'),
+ fbSNum:P('יש בתשובה פרט מדיד (מספר או זמן), וזה הופך אותה למעשית.','יש בתשובה פרט מדיד (מספר או זמן), וזה הופך אותה למעשית.'),
+ fbSQ:P('השאלה שכתבת פתוחה ומזמינה תשובה, וזה בדיוק הכיוון.','השאלה שכתבת פתוחה ומזמינה תשובה, וזה בדיוק הכיוון.'),
+ fbSLen:P('אורך התשובה מתאים: קצר מספיק כדי לזכור.','אורך התשובה מתאים: קצר מספיק כדי לזכור.'),
+ fbNeedAct:P('לשיפור: כתוב בגוף ראשון מה אתה עושה בפועל, למשל "אכתוב" או "אשאל".','לשיפור: כתבי בגוף ראשון מה את עושה בפועל, למשל "אכתוב" או "אשאל".'),
+ fbNeedNum:P('לשיפור: הוסף מספר או זמן, למשל "ביום שלישי" או "שלוש פעמים".','לשיפור: הוסיפי מספר או זמן, למשל "ביום שלישי" או "שלוש פעמים".'),
+ fbT_ch:P('טיפ לפרק: אמור את המשפט בקול לפני שאתה כותב אותו, ובדוק אם הוא נשמע טבעי.','טיפ לפרק: אמרי את המשפט בקול לפני שאת כותבת אותו, ובדקי אם הוא נשמע טבעי.'),
+ fbT_th:P('טיפ לפרק: הגבל את עצמך לצעד אחד, ובדוק אותו אחרי יום.','טיפ לפרק: הגבילי את עצמך לצעד אחד, ובדקי אותו אחרי יום.'),
+ fbT_br:P('טיפ לפרק: חשוב על אדם אחד מהקהל שלך וכתוב כאילו אתה מדבר אליו.','טיפ לפרק: חשבי על אדם אחד מהקהל שלך וכתבי כאילו את מדברת אליו.'),
+ fbT_tr:P('טיפ לפרק: כתוב את הכלל כך שאפשר לבדוק אותו אחרי העסקה, ללא פרשנות.','טיפ לפרק: כתבי את הכלל כך שאפשר לבדוק אותו אחרי העסקה, ללא פרשנות.'),
+ fbT_ld:P('טיפ לפרק: הוסף מי אחראי ומתי בודקים, כדי שהכוונה תהפוך להחלטה.','טיפ לפרק: הוסיפי מי אחראי ומתי בודקים, כדי שהכוונה תהפוך להחלטה.'),
  sayTitle:P('תגיד את זה נכון','תגידי את זה נכון'),
  tabSay:P('תגיד נכון','תגידי נכון'),
  say:P('תגיד','תגידי'),
@@ -366,17 +378,32 @@ function vLessons(){
   h+='<div class="row"><button class="btn" data-a="back" aria-label="חזרה">‹</button><div class="bar grow"><i style="width:'+((V.step+1)/4*100)+'%"></i></div><span class="small">'+(V.step+1)+' מתוך 4</span></div><div class="small" style="color:var(--accent);font-weight:700">'+j.name+'</div><h1 style="font-size:26px">'+L.t+'</h1>';
   if(V.step===0)h+='<div class="video">'+ic('play',34)+'<div>סרטון ההסבר יתווסף כאן</div><div class="small" style="color:#B9BECB">בהדמיה בלי וידאו</div></div><div class="card"><b>הרעיון המרכזי</b><p style="margin:8px 0 10px">'+g(L.idea)+'</p>'+spk(g(L.idea),'he-IL',null,'lesson-'+j.id+'-'+(V.lesson.i+1)+'-idea')+'</div>';
   if(V.step===1)h+='<div class="notice"><b>תרגיל של 2 דקות</b><div style="margin-top:4px">'+g(L.ex)+'</div></div><label for="ans" class="small">התשובה שלך</label><textarea id="ans" placeholder="'+esc(g(L.ph))+'">'+esc(V.answer)+'</textarea><div class="row wrap">'+spk(g(L.ex),'he-IL',u('readEx'),'lesson-'+j.id+'-'+(V.lesson.i+1)+'-ex')+'<button class="btn '+(V.listening&&V.mode==='dict'?'dark':'')+'" data-a="dict" style="min-height:40px;padding:0 14px">'+ic('mic',18)+' '+(V.listening&&V.mode==='dict'?u('stopRec'):u('answerAloud'))+'</button></div>'+(V.listening&&V.mode==='dict'?'<div class="small" role="status">ההקלטה פעילה. לחיצה נוספת על הכפתור עוצרת אותה.</div>':'')+(IOS?'<div class="notice" role="note"><b>'+u('iosTitle')+'</b><div style="margin-top:4px">'+u('iosBody')+'</div></div>':'<div class="small">'+u('dictHint')+'</div>');
-  if(V.step===2){var f=V.feedback||feedback(V.answer);V.feedback=f;h+='<div class="card"><b>המשוב</b><div class="small">משוב לדוגמה לפי כללים פשוטים. ה-AI האמיתי יחליף אותו.</div><p style="margin:8px 0 10px">'+f.text+'</p>'+spk(f.text,'he-IL')+'</div><div class="card"><div class="small">התשובה שלך</div><p style="margin:4px 0 0">'+esc(V.answer||'לא כתבת תשובה')+'</p></div>'}
+  if(V.step===2){var f=V.feedback||feedback(V.answer,j.id);V.feedback=f;h+='<div class="card"><b>המשוב</b><div class="small">משוב לדוגמה לפי כללים פשוטים. ה-AI האמיתי יחליף אותו.</div><p style="margin:8px 0 10px">'+f.text+'</p>'+spk(f.text,'he-IL')+'</div><div class="card"><div class="small">התשובה שלך</div><p style="margin:4px 0 0">'+esc(V.answer||'לא כתבת תשובה')+'</p></div>'}
   if(V.step===3)h+='<div class="hero"><h2 style="font-size:24px">כל הכבוד</h2><div>השלמת את השיעור. הרצף שלך: '+S.streak+' ימים.</div></div>';
   if(V.msg)h+='<div class="notice" role="status">'+V.msg+'</div>';h+='<div class="row"><button class="btn primary grow" data-a="next">'+(V.step===3?'סיום':V.step===1?u('getFeedback'):u('cont'))+'</button></div>';
   return '<main>'+h+'</main>';
 }
-function feedback(a){
+function feedback(a,jid){
   var t=(a||'').trim();if(!t)return{text:u('fbEmpty')};
-  var hedges=['אולי','נראה לי','אני לא בטוח','סליחה','קצת','only','maybe','sorry','just'],hit=hedges.filter(function(w){return t.toLowerCase().indexOf(w)>-1});
+  var low=t.toLowerCase(),words=t.split(/\s+/).filter(Boolean).length;
+  var hedges=['אולי','נראה לי','אני לא בטוח','סליחה','קצת','only','maybe','sorry','just'],hit=hedges.filter(function(w){return low.indexOf(w)>-1});
   if(hit.length)return{text:u('fbHedge').replace('{w}',esc(hit[0]))};
   if(t.length>140)return{text:u('fbLong')};
-  return{text:u('fbGood')};
+  if(words<4)return{text:u('fbShort')};
+  var nonVerb=['איך','אני','אבל','אם','אין','איפה','אתה','את','אתם','אנחנו','אחרי','אפשר','אחד','אחת','אותו','אותה','אולי','אלה','אלו','אצל','איזה','איזו','אחר','אחרת','אפילו','אמיתי'];
+  var hasAct=t.split(/[\s,.:;"()?!]+/).some(function(w){return /^א[א-ת]{2,}$/.test(w)&&nonVerb.indexOf(w)<0});
+  var hasNum=/[0-9]|שני|שתי|שלוש|ארבע|חמש|שש |שבע|שמונה|תשע|עשר|ביום|בשבוע|מחר|דקות|שעה|פעמים|פעם אחת/.test(t);
+  var hasQ=t.indexOf('?')>-1;
+  var good=[],need=[];
+  if(hasAct)good.push(u('fbSAct'));else need.push(u('fbNeedAct'));
+  if(hasNum)good.push(u('fbSNum'));else need.push(u('fbNeedNum'));
+  if(hasQ)good.push(u('fbSQ'));
+  if(t.length<=100)good.push(u('fbSLen'));
+  var parts=[];
+  if(good.length)parts.push(good.slice(0,2).join(' '));
+  if(need.length)parts.push(need[0]);
+  else{var tip=u('fbT_'+jid);if(tip&&tip.indexOf('fbT_')!==0)parts.push(tip)}
+  return{text:parts.join(' ')};
 }
 function vSay(){
   if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
