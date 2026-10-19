@@ -686,7 +686,7 @@ document.addEventListener('click',function(e){
   else if(a==='coachsend'){var ci=document.getElementById('coachin'),tx=ci?ci.value.trim():'';stopVoice();
     if(!tx){V.said='';V.msg='כתבו או אמרו תשובה, ואז אפשר לקבל משוב.'}
     else{var CC=V.coach;V.said=tx;V.msg='';CC.said=tx;CC.fb=coachFb(tx,CC.sit,CC.r);CC.scores[CC.r]=CC.fb.best;CC.ph='fb';
-      playSeq([cq(CC.fb.head),{aid:'coach-goodWay',t:g(COACH.goodWay),l:'he-IL'},{aid:CC.sit.gid[CC.fb.bi],t:g(CC.sit.good[CC.fb.bi]),l:CC.sit.lang}])}}
+      playSeq([cq(CC.fb.head),{aid:'coach-goodWay',t:g(COACH.goodWay),l:'he-IL'}].concat(CC.sit.good.map(function(x,k){return {aid:CC.sit.gid[k],t:g(x),l:CC.sit.lang}})))}}
   else if(a==='coachretry'){stopVoice();V.coach.ph='ask';V.said=V.coach.said}
   else if(a==='coachback'){stopVoice();var C3=V.coach;V.msg='';if(C3.ph==='done'){C3.ph='ask';C3.r=C3.sit.bad.length-1;V.said=''}else if(C3.ph==='fb'){C3.ph='ask';V.said=C3.said}else if(C3.r>0){C3.r--;C3.ph='ask';V.said=''}else{V.coach=null;V.said=''}}
   else if(a==='coachnext'){stopVoice();var C2=V.coach;V.said='';V.msg='';if(C2.r<C2.sit.bad.length-1){C2.r++;C2.ph='ask';playSeq(coachSeq())}else{C2.ph='done'}}
