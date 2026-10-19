@@ -73,6 +73,13 @@ nav.tabs .in{max-width:480px;margin:0 auto;display:flex;justify-content:space-ar
 .vs-good{background:rgba(45,179,165,.2);border:1px solid rgba(45,179,165,.55)}
 .vs-task{background:rgba(255,255,255,.1);border-radius:12px;padding:10px 12px;font-size:16px;font-weight:700}
 .vs-note{font-size:13px;color:#B9BECB}
+.vsvg{width:100%;height:auto;display:block;direction:ltr}
+.vsvg.vbg{position:absolute;inset-inline:0;top:8px;opacity:.28;width:100%}
+.vd{stroke-dasharray:1;stroke-dashoffset:1;animation:vdraw var(--d,2s) linear forwards}
+@keyframes vdraw{to{stroke-dashoffset:0}}
+.vg{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0);animation:vgrow .9s ease-out forwards}
+@keyframes vgrow{to{transform:scaleY(1)}}
+.vs-chk li::before{content:"\2713";background:none;width:auto;height:auto;top:0;color:var(--accent);font-weight:800;border-radius:0}
 .vi{opacity:0;animation:vfade .6s ease forwards}
 @keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .vseg{position:absolute;inset-inline:12px;bottom:10px;display:flex;gap:4px}
@@ -631,20 +638,20 @@ function vCoach(){
 /*VID-START*/
 var VID={
  'tr-0':{title:'פסיכולוגיית מסחר',slides:[
-  {k:'title',h:'פסיכולוגיית מסחר',sub:'למה ההתנהגות מפסידה יותר מהניתוח',
+  {k:'title',scene:'bg',h:'פסיכולוגיית מסחר',sub:'למה ההתנהגות מפסידה יותר מהניתוח',
    narr:P('ברוכים הבאים. בשיעור הזה נדבר על מה שמפיל רוב הסוחרים: לא הניתוח, אלא ההתנהגות. בשתי דקות תבין איפה הרגש נכנס לעסקה, ואיך תוכנית כתובה מוציאה אותו מההחלטות שלך.','ברוכים הבאים. בשיעור הזה נדבר על מה שמפיל רוב הסוחרים: לא הניתוח, אלא ההתנהגות. בשתי דקות תביני איפה הרגש נכנס לעסקה, ואיך תוכנית כתובה מוציאה אותו מההחלטות שלך.')},
   {k:'points',h:'איפה מפסידים באמת',items:['כניסה מפחד להחמיץ','החזקת הפסד בתקווה שיחזור','יציאה מוקדמת מרווח, מתוך לחץ','שינוי הכללים באמצע העסקה'],
    narr:'ברוב המקרים ההפסד לא מגיע מניתוח גרוע. הוא מגיע ממה שעושים באמצע העסקה. נכנסים מהר כי פחדו להחמיץ. מחזיקים הפסד ומקווים שיחזור. יוצאים מרווח אחרי שניות, מרוב לחץ. ומשנים את הכללים תוך כדי עסקה.'},
-  {k:'compare',h:'דוגמה: ההזדמנות שבורחת',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
+  {k:'compare',scene:'fomo',h:'דוגמה: ההזדמנות שבורחת',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
    bad:'המחיר זינק. אם לא אכנס עכשיו, אפספס הכול.',good:P('אין לי תרחיש כתוב לזה, אז אני לא נכנס. מחכה לסימן שמתאים לתוכנית.','אין לי תרחיש כתוב לזה, אז אני לא נכנסת. מחכה לסימן שמתאים לתוכנית.'),
    narr:'הנה דוגמה מוכרת. נכס מזנק בעשרה אחוזים בתוך דקות, והתחושה היא: עכשיו או לעולם לא. מי שנכנס מתוך התחושה הזו קונה לא פעם ליד השיא. מי שיש לו תוכנית שואל שאלה אחת: האם זה התרחיש שכתבתי מראש? אם לא, הוא מחכה.'},
-  {k:'points',h:'למה המוח עושה את זה',items:['הפסד כואב יותר מרווח באותו גודל','לחץ מקצר את החשיבה','הקהל משכנע אותנו שכולם מרוויחים'],
+  {k:'points',scene:'loss',h:'למה המוח עושה את זה',items:['הפסד כואב יותר מרווח באותו גודל','לחץ מקצר את החשיבה','הקהל משכנע אותנו שכולם מרוויחים'],
    narr:'לזה יש הסבר. מחקרים בכלכלה התנהגותית מראים שהפסד כואב לנו בערך פי שניים מהנאה מרווח באותו גודל, ולכן קשה כל כך לסגור הפסד. תחת לחץ המוח עובר לקיצורי דרך. והקהל ברשת גורם לנו להרגיש שכולם מרוויחים חוץ מאיתנו.'},
   {k:'steps',h:'ארבעה חלקים בתוכנית כתובה',items:['תרחיש כניסה: מה חייב לקרות','יציאה בהפסד, קבועה מראש','גודל סיכון קבוע לעסקה','כלל עצירה אחרי רצף הפסדים'],
    narr:P('תוכנית כתובה לא צריכה להיות מסובכת. ארבעה חלקים מספיקים. אחד, תרחיש כניסה: מה בדיוק צריך לקרות כדי שתיכנס. שניים, נקודת יציאה בהפסד שנקבעת לפני הכניסה. שלושה, גודל סיכון קבוע, כדי שעסקה אחת לא תכריע. וארבעה, כלל עצירה: אחרי רצף הפסדים עוצרים.','תוכנית כתובה לא צריכה להיות מסובכת. ארבעה חלקים מספיקים. אחד, תרחיש כניסה: מה בדיוק צריך לקרות כדי שתיכנסי. שניים, נקודת יציאה בהפסד שנקבעת לפני הכניסה. שלושה, גודל סיכון קבוע, כדי שעסקה אחת לא תכריע. וארבעה, כלל עצירה: אחרי רצף הפסדים עוצרים.')},
-  {k:'points',h:'שלוש שאלות לפני כל כניסה',items:['האם זה התרחיש שכתבתי מראש?','איפה היציאה אם אני טועה?','כמה אפסיד, והאם אני מסכים לזה?'],
+  {k:'points',chk:true,h:'שלוש שאלות לפני כל כניסה',items:['האם זה התרחיש שכתבתי מראש?','איפה היציאה אם אני טועה?','כמה אפסיד, והאם אני מסכים לזה?'],
    narr:'לפני כל כניסה שואלים שלוש שאלות. האם זה התרחיש שכתבתי מראש? איפה היציאה אם אני טועה? וכמה אפסיד, והאם אני באמת מסכים להפסד הזה? אם אחת התשובות חסרה, לא נכנסים. השאלות האלה לוקחות עשר שניות, והן חוסכות הרבה כסף.'},
-  {k:'compare',h:'ההבדל במציאות',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
+  {k:'compare',scene:'plan',h:'ההבדל במציאות',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
    bad:'נר ירוק גדול, כניסה בלחץ, ירידה, הוספה כדי לממצע, הפסד גדול.',good:'תרחיש כתוב, סטופ ידוע, ירידה, יציאה כמתוכנן, הפסד קטן.',
    narr:'בואו נראה את ההבדל. בלי תוכנית: רואים נר ירוק גדול, נכנסים בלחץ, המחיר יורד, מוסיפים כסף כדי לממצע, וההפסד גדל. עם תוכנית: נכנסים רק בתרחיש, הסטופ ידוע מראש, המחיר יורד, יוצאים כמתוכנן, וההפסד קטן ומתוכנן.'},
   {k:'recap',h:'לסיכום',items:['ההפסד נוצר בהתנהגות','תוכנית כתובה מורידה את הרגש מהעסקה'],task:P('התרגיל: כתוב כלל אחד שימנע ממך כניסה מתוך FOMO','התרגיל: כתבי כלל אחד שימנע ממך כניסה מתוך FOMO'),note:'תוכן חינוכי בלבד, לא המלצה להשקעה.',
@@ -655,11 +662,41 @@ var VID={
 /*VIDUI-START*/
 function vidWords(sl){var t=typeof sl.narr==='string'?sl.narr:sl.narr.m;return t.split(/\s+/).length}
 function vidEst(sl){return Math.max(8,vidWords(sl)/2.5)}
+
+function vidScene(n,est){
+  var T=function(f){return (est*f).toFixed(1)+'s'};
+  var dr=function(d,col,dur,delay,w,dash){return '<path d="'+d+'" pathLength="1" fill="none" stroke="'+col+'" stroke-width="'+(w||3)+'" stroke-linecap="round" stroke-linejoin="round" class="vd" style="--d:'+dur+';animation-delay:'+delay+(dash?';stroke-dasharray:.02 .02':'')+'"/>'};
+  var dot=function(x,y,col,delay,r){return '<circle cx="'+x+'" cy="'+y+'" r="'+(r||6)+'" fill="'+col+'" class="vi" style="animation-delay:'+delay+'"/>'};
+  var tx=function(x,y,t,col,delay,sz){return '<text x="'+x+'" y="'+y+'" text-anchor="middle" font-size="'+(sz||11)+'" fill="'+col+'" class="vi" style="animation-delay:'+delay+'">'+t+'</text>'};
+  var open='<svg class="vsvg" viewBox="0 0 300 130" role="img" aria-hidden="true">';
+  if(n==='bg')return '<svg class="vsvg vbg" viewBox="0 0 300 130" aria-hidden="true">'+dr('M5 110 L40 95 L70 100 L110 70 L140 78 L180 40 L215 52 L250 20 L295 30','#2DB3A5',T(.9),'0s',3)+'</svg>';
+  if(n==='fomo')return open+
+    dr('M8 108 L55 102 L95 96 L125 50 L150 16 L190 58 L232 90 L292 102','#E8E6DF',T(.75),'0s',3)+
+    dot(150,16,'#E5524A',T(.34),7)+tx(150,36,'כניסה מתוך FOMO','#F3A39D',T(.36),11)+
+    tx(236,76,'ירידה','#B9BECB',T(.62),11)+
+    '<line x1="8" y1="62" x2="292" y2="62" stroke="#2DB3A5" stroke-width="1.5" stroke-dasharray="4 4" class="vi" style="animation-delay:'+T(.8)+'"/>'+
+    tx(150,124,'הקו המקווקו: התרחיש שכתבתי מראש','#7FD6CC',T(.82),10)+'</svg>';
+  if(n==='loss')return open+
+    '<rect x="70" y="20" width="60" height="88" rx="6" fill="#E5524A" class="vg" style="animation-delay:'+T(.2)+'"/>'+
+    '<rect x="170" y="64" width="60" height="44" rx="6" fill="#2DB3A5" class="vg" style="animation-delay:'+T(.4)+'"/>'+
+    tx(100,14,'הפסד 100','#F3A39D',T(.3),12)+tx(200,58,'רווח 100','#7FD6CC',T(.5),12)+
+    tx(150,124,'ההפסד מרגיש בערך כפול','#E8E6DF',T(.7),11)+'</svg>';
+  if(n==='plan')return open+
+    tx(72,12,'בלי תוכנית','#F3A39D',T(.05),11)+tx(228,12,'עם תוכנית','#7FD6CC',T(.05),11)+
+    dr('M6 100 L30 78 L50 56 L80 76 L112 112 L136 120','#E8E6DF',T(.5),'0s',2.5)+
+    dot(50,56,'#E5524A',T(.22),5)+dot(80,76,'#E5524A',T(.32),5)+tx(80,92,'ממצע','#F3A39D',T(.34),9)+
+    '<line x1="144" y1="56" x2="144" y2="118" stroke="#E5524A" stroke-width="3" class="vi" style="animation-delay:'+T(.55)+'"/>'+tx(130,126,'הפסד גדול','#F3A39D',T(.58),10)+
+    dr('M164 100 L188 78 L208 56 L228 70 L262 112 L292 120','#E8E6DF',T(.5),T(.1),2.5)+
+    '<line x1="190" y1="70" x2="262" y2="70" stroke="#2DB3A5" stroke-width="1.5" stroke-dasharray="4 4" class="vi" style="animation-delay:'+T(.3)+'"/>'+
+    dot(208,56,'#2DB3A5',T(.32),5)+dot(228,70,'#2DB3A5',T(.45),5)+tx(246,62,'סטופ','#7FD6CC',T(.4),9)+
+    '<line x1="296" y1="56" x2="296" y2="70" stroke="#2DB3A5" stroke-width="3" class="vi" style="animation-delay:'+T(.6)+'"/>'+tx(262,126,'הפסד קטן','#7FD6CC',T(.62),10)+'</svg>';
+  return '';
+}
 function vidSlide(sl,est){
   var n=sl.items?sl.items.length:2,d=function(k){return ' style="animation-delay:'+(est*(k+.5)/(n+1.4)).toFixed(1)+'s"'};
-  var h='<div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div>';
-  if(sl.k==='title')return '<div class="vs-title"><div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div><div class="vs-sub vi" style="animation-delay:1.2s">'+esc(sl.sub)+'</div></div>';
-  if(sl.k==='points')return h+'<ul class="vs-list">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'>'+esc(x)+'</li>'}).join('')+'</ul>';
+  var h='<div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div>'+(sl.scene?vidScene(sl.scene,est):'');
+  if(sl.k==='title')return (sl.scene?vidScene(sl.scene,est):'')+'<div class="vs-title"><div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div><div class="vs-sub vi" style="animation-delay:1.2s">'+esc(sl.sub)+'</div></div>';
+  if(sl.k==='points')return h+'<ul class="vs-list'+(sl.chk?' vs-chk':'')+'">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'>'+esc(x)+'</li>'}).join('')+'</ul>';
   if(sl.k==='steps')return h+'<ol class="vs-steps">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'><b>'+(k+1)+'</b><span>'+esc(x)+'</span></li>'}).join('')+'</ol>';
   if(sl.k==='compare')return h+'<div class="vs-cmp"><div class="vs-bad vi" style="animation-delay:'+(est*.25).toFixed(1)+'s"><small>'+esc(sl.badLabel)+'</small>'+esc(g(sl.bad))+'</div><div class="vs-good vi" style="animation-delay:'+(est*.6).toFixed(1)+'s"><small>'+esc(sl.goodLabel)+'</small>'+esc(g(sl.good))+'</div></div>';
   if(sl.k==='recap')return h+'<ul class="vs-list">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'>'+esc(x)+'</li>'}).join('')+'</ul><div class="vs-task vi" style="animation-delay:'+(est*.6).toFixed(1)+'s">'+esc(g(sl.task))+'</div><div class="vs-note vi" style="animation-delay:'+(est*.8).toFixed(1)+'s">'+esc(sl.note)+'</div>';
