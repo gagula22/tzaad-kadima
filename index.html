@@ -54,6 +54,37 @@ nav.tabs .in{max-width:480px;margin:0 auto;display:flex;justify-content:space-ar
 .say-bad{font-size:20px;color:var(--muted);text-decoration:line-through;text-decoration-color:var(--bad)}
 .say-good{background:var(--accent);color:var(--accent-fg);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:6px}
 .say-good b{font-size:24px;line-height:1.3}
+.vstage{position:relative;min-height:230px;border-radius:18px;background:var(--dark-card);color:#E8E6DF;padding:18px 16px 26px;display:flex;flex-direction:column;justify-content:center;gap:12px;overflow:hidden}
+.vstage .vslide{display:flex;flex-direction:column;gap:12px}
+.vs-h{font-size:22px;font-weight:800;line-height:1.25;color:#fff}
+.vs-sub{font-size:15px;color:#B9BECB}
+.vs-title{display:flex;flex-direction:column;gap:10px;align-items:center;text-align:center}
+.vs-title .vs-h{font-size:28px}
+.vs-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.vs-list li{font-size:17px;line-height:1.35;padding-inline-start:18px;position:relative}
+.vs-list li::before{content:"";position:absolute;inset-inline-start:0;top:.55em;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.vs-steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.vs-steps li{display:flex;gap:10px;align-items:center;font-size:16px;line-height:1.3}
+.vs-steps b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center}
+.vs-cmp{display:flex;flex-direction:column;gap:10px}
+.vs-cmp>div{border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.35}
+.vs-cmp small{display:block;font-weight:700;margin-bottom:3px;opacity:.85}
+.vs-bad{background:rgba(190,60,60,.22);border:1px solid rgba(190,60,60,.5)}
+.vs-good{background:rgba(45,179,165,.2);border:1px solid rgba(45,179,165,.55)}
+.vs-task{background:rgba(255,255,255,.1);border-radius:12px;padding:10px 12px;font-size:16px;font-weight:700}
+.vs-note{font-size:13px;color:#B9BECB}
+.vi{opacity:0;animation:vfade .6s ease forwards}
+@keyframes vfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vseg{position:absolute;inset-inline:12px;bottom:10px;display:flex;gap:4px}
+.vseg i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}
+.vseg i.full{background:var(--accent)}
+.vseg i.cur{background:linear-gradient(var(--accent),var(--accent)) no-repeat rgba(255,255,255,.25);background-size:0 100%;animation:vprog linear forwards}
+@keyframes vprog{to{background-size:100% 100%}}
+.vstage.paused *{animation-play-state:paused!important}
+.vposter{align-items:center;text-align:center;min-height:200px}
+.vplay{width:64px;height:64px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-fg);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.vcap{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){.vi{animation-duration:.01s}.vseg i.cur{animation:none;background-size:100% 100%}}
 .video{height:170px;border-radius:18px;background:var(--dark-card);color:#E8E6DF;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:12px}
 textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:12px;resize:vertical}
 input[type=text],input[type=date]{width:100%;min-height:48px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:0 12px}
@@ -203,7 +234,7 @@ function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 var V={tab:'home',lesson:null,step:0,answer:'',feedback:null,card:0,filter:'he',reveal:false,qi:0,plan:'h',method:'bit',notice:'',msg:'',listening:false,mode:'',said:'',score:null,sayTab:'ex',sx:0,sxl:'he',coach:null};
 var seqTok=0;
-var NAV=[];
+var NAV=[];V.vid=null;
 function navSnap(){return JSON.stringify({tab:V.tab,lesson:V.lesson,step:V.step,sayTab:V.sayTab,sx:V.sx,sxl:V.sxl,filter:V.filter,card:V.card,reveal:V.reveal,coach:V.coach,said:V.said})}
 var navPre='';
 
@@ -386,7 +417,7 @@ function vLessons(){
   }
   var j=JOURNEYS.filter(function(x){return x.id===V.lesson.j})[0],L=j.lessons[V.lesson.i],h='';
   h+='<div class="row"><button class="btn" data-a="back" aria-label="חזרה">‹</button><div class="bar grow"><i style="width:'+((V.step+1)/4*100)+'%"></i></div><span class="small">'+(V.step+1)+' מתוך 4</span></div><div class="small" style="color:var(--accent);font-weight:700">'+j.name+'</div><h1 style="font-size:26px">'+L.t+'</h1>';
-  if(V.step===0)h+='<div class="video">'+ic('play',34)+'<div>סרטון ההסבר יתווסף כאן</div><div class="small" style="color:#B9BECB">בהדמיה בלי וידאו</div></div><div class="card"><b>הרעיון המרכזי</b><p style="margin:8px 0 10px">'+g(L.idea)+'</p>'+spk(g(L.idea),'he-IL',null,'lesson-'+j.id+'-'+(V.lesson.i+1)+'-idea')+'</div>';
+  if(V.step===0)h+=vidBlock(j.id,V.lesson.i)+'<div class="card"><b>הרעיון המרכזי</b><p style="margin:8px 0 10px">'+g(L.idea)+'</p>'+spk(g(L.idea),'he-IL',null,'lesson-'+j.id+'-'+(V.lesson.i+1)+'-idea')+'</div>';
   if(V.step===1)h+='<div class="notice"><b>תרגיל של 2 דקות</b><div style="margin-top:4px">'+g(L.ex)+'</div></div><label for="ans" class="small">התשובה שלך</label><textarea id="ans" placeholder="'+esc(g(L.ph))+'">'+esc(V.answer)+'</textarea><div class="row wrap">'+spk(g(L.ex),'he-IL',u('readEx'),'lesson-'+j.id+'-'+(V.lesson.i+1)+'-ex')+'<button class="btn '+(V.listening&&V.mode==='dict'?'dark':'')+'" data-a="dict" style="min-height:40px;padding:0 14px">'+ic('mic',18)+' '+(V.listening&&V.mode==='dict'?u('stopRec'):u('answerAloud'))+'</button></div>'+(V.listening&&V.mode==='dict'?'<div class="small" role="status">ההקלטה פעילה. לחיצה נוספת על הכפתור עוצרת אותה.</div>':'')+(IOS?'<div class="notice" role="note"><b>'+u('iosTitle')+'</b><div style="margin-top:4px">'+u('iosBody')+'</div></div>':'<div class="small">'+u('dictHint')+'</div>');
   if(V.step===2){var f=V.feedback||feedback(V.answer,j.id);V.feedback=f;h+='<div class="card"><b>המשוב</b><div class="small">משוב לדוגמה לפי כללים פשוטים. ה-AI האמיתי יחליף אותו.</div><p style="margin:8px 0 10px">'+f.text+'</p>'+spk(f.text,'he-IL')+'</div><div class="card"><div class="small">התשובה שלך</div><p style="margin:4px 0 0">'+esc(V.answer||'לא כתבת תשובה')+'</p></div>'+deepFb(j.id,V.lesson.i)}
   if(V.step===3)h+='<div class="hero"><h2 style="font-size:24px">כל הכבוד</h2><div>השלמת את השיעור. הרצף שלך: '+S.streak+' ימים.</div></div>';
@@ -597,6 +628,75 @@ function vCoach(){
 }
 /*COACH-END*/
 
+/*VID-START*/
+var VID={
+ 'tr-0':{title:'פסיכולוגיית מסחר',slides:[
+  {k:'title',h:'פסיכולוגיית מסחר',sub:'למה ההתנהגות מפסידה יותר מהניתוח',
+   narr:P('ברוכים הבאים. בשיעור הזה נדבר על מה שמפיל רוב הסוחרים: לא הניתוח, אלא ההתנהגות. בשתי דקות תבין איפה הרגש נכנס לעסקה, ואיך תוכנית כתובה מוציאה אותו מההחלטות שלך.','ברוכים הבאים. בשיעור הזה נדבר על מה שמפיל רוב הסוחרים: לא הניתוח, אלא ההתנהגות. בשתי דקות תביני איפה הרגש נכנס לעסקה, ואיך תוכנית כתובה מוציאה אותו מההחלטות שלך.')},
+  {k:'points',h:'איפה מפסידים באמת',items:['כניסה מפחד להחמיץ','החזקת הפסד בתקווה שיחזור','יציאה מוקדמת מרווח, מתוך לחץ','שינוי הכללים באמצע העסקה'],
+   narr:'ברוב המקרים ההפסד לא מגיע מניתוח גרוע. הוא מגיע ממה שעושים באמצע העסקה. נכנסים מהר כי פחדו להחמיץ. מחזיקים הפסד ומקווים שיחזור. יוצאים מרווח אחרי שניות, מרוב לחץ. ומשנים את הכללים תוך כדי עסקה.'},
+  {k:'compare',h:'דוגמה: ההזדמנות שבורחת',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
+   bad:'המחיר זינק. אם לא אכנס עכשיו, אפספס הכול.',good:P('אין לי תרחיש כתוב לזה, אז אני לא נכנס. מחכה לסימן שמתאים לתוכנית.','אין לי תרחיש כתוב לזה, אז אני לא נכנסת. מחכה לסימן שמתאים לתוכנית.'),
+   narr:'הנה דוגמה מוכרת. נכס מזנק בעשרה אחוזים בתוך דקות, והתחושה היא: עכשיו או לעולם לא. מי שנכנס מתוך התחושה הזו קונה לא פעם ליד השיא. מי שיש לו תוכנית שואל שאלה אחת: האם זה התרחיש שכתבתי מראש? אם לא, הוא מחכה.'},
+  {k:'points',h:'למה המוח עושה את זה',items:['הפסד כואב יותר מרווח באותו גודל','לחץ מקצר את החשיבה','הקהל משכנע אותנו שכולם מרוויחים'],
+   narr:'לזה יש הסבר. מחקרים בכלכלה התנהגותית מראים שהפסד כואב לנו בערך פי שניים מהנאה מרווח באותו גודל, ולכן קשה כל כך לסגור הפסד. תחת לחץ המוח עובר לקיצורי דרך. והקהל ברשת גורם לנו להרגיש שכולם מרוויחים חוץ מאיתנו.'},
+  {k:'steps',h:'ארבעה חלקים בתוכנית כתובה',items:['תרחיש כניסה: מה חייב לקרות','יציאה בהפסד, קבועה מראש','גודל סיכון קבוע לעסקה','כלל עצירה אחרי רצף הפסדים'],
+   narr:P('תוכנית כתובה לא צריכה להיות מסובכת. ארבעה חלקים מספיקים. אחד, תרחיש כניסה: מה בדיוק צריך לקרות כדי שתיכנס. שניים, נקודת יציאה בהפסד שנקבעת לפני הכניסה. שלושה, גודל סיכון קבוע, כדי שעסקה אחת לא תכריע. וארבעה, כלל עצירה: אחרי רצף הפסדים עוצרים.','תוכנית כתובה לא צריכה להיות מסובכת. ארבעה חלקים מספיקים. אחד, תרחיש כניסה: מה בדיוק צריך לקרות כדי שתיכנסי. שניים, נקודת יציאה בהפסד שנקבעת לפני הכניסה. שלושה, גודל סיכון קבוע, כדי שעסקה אחת לא תכריע. וארבעה, כלל עצירה: אחרי רצף הפסדים עוצרים.')},
+  {k:'points',h:'שלוש שאלות לפני כל כניסה',items:['האם זה התרחיש שכתבתי מראש?','איפה היציאה אם אני טועה?','כמה אפסיד, והאם אני מסכים לזה?'],
+   narr:'לפני כל כניסה שואלים שלוש שאלות. האם זה התרחיש שכתבתי מראש? איפה היציאה אם אני טועה? וכמה אפסיד, והאם אני באמת מסכים להפסד הזה? אם אחת התשובות חסרה, לא נכנסים. השאלות האלה לוקחות עשר שניות, והן חוסכות הרבה כסף.'},
+  {k:'compare',h:'ההבדל במציאות',badLabel:'בלי תוכנית',goodLabel:'עם תוכנית',
+   bad:'נר ירוק גדול, כניסה בלחץ, ירידה, הוספה כדי לממצע, הפסד גדול.',good:'תרחיש כתוב, סטופ ידוע, ירידה, יציאה כמתוכנן, הפסד קטן.',
+   narr:'בואו נראה את ההבדל. בלי תוכנית: רואים נר ירוק גדול, נכנסים בלחץ, המחיר יורד, מוסיפים כסף כדי לממצע, וההפסד גדל. עם תוכנית: נכנסים רק בתרחיש, הסטופ ידוע מראש, המחיר יורד, יוצאים כמתוכנן, וההפסד קטן ומתוכנן.'},
+  {k:'recap',h:'לסיכום',items:['ההפסד נוצר בהתנהגות','תוכנית כתובה מורידה את הרגש מהעסקה'],task:P('התרגיל: כתוב כלל אחד שימנע ממך כניסה מתוך FOMO','התרגיל: כתבי כלל אחד שימנע ממך כניסה מתוך FOMO'),note:'תוכן חינוכי בלבד, לא המלצה להשקעה.',
+   narr:P('לסיכום: ההפסד נוצר בהתנהגות, ותוכנית כתובה מורידה את הרגש מהעסקה. עכשיו התרגיל: כתוב כלל אחד שימנע ממך כניסה מתוך פחד להחמיץ. וזכור, זה תוכן חינוכי בלבד ולא המלצה להשקעה.','לסיכום: ההפסד נוצר בהתנהגות, ותוכנית כתובה מורידה את הרגש מהעסקה. עכשיו התרגיל: כתבי כלל אחד שימנע ממך כניסה מתוך פחד להחמיץ. וזכרי, זה תוכן חינוכי בלבד ולא המלצה להשקעה.')}
+ ]}
+};
+/*VID-END*/
+/*VIDUI-START*/
+function vidWords(sl){var t=typeof sl.narr==='string'?sl.narr:sl.narr.m;return t.split(/\s+/).length}
+function vidEst(sl){return Math.max(8,vidWords(sl)/2.5)}
+function vidSlide(sl,est){
+  var n=sl.items?sl.items.length:2,d=function(k){return ' style="animation-delay:'+(est*(k+.5)/(n+1.4)).toFixed(1)+'s"'};
+  var h='<div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div>';
+  if(sl.k==='title')return '<div class="vs-title"><div class="vs-h vi" style="animation-delay:0s">'+esc(sl.h)+'</div><div class="vs-sub vi" style="animation-delay:1.2s">'+esc(sl.sub)+'</div></div>';
+  if(sl.k==='points')return h+'<ul class="vs-list">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'>'+esc(x)+'</li>'}).join('')+'</ul>';
+  if(sl.k==='steps')return h+'<ol class="vs-steps">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'><b>'+(k+1)+'</b><span>'+esc(x)+'</span></li>'}).join('')+'</ol>';
+  if(sl.k==='compare')return h+'<div class="vs-cmp"><div class="vs-bad vi" style="animation-delay:'+(est*.25).toFixed(1)+'s"><small>'+esc(sl.badLabel)+'</small>'+esc(g(sl.bad))+'</div><div class="vs-good vi" style="animation-delay:'+(est*.6).toFixed(1)+'s"><small>'+esc(sl.goodLabel)+'</small>'+esc(g(sl.good))+'</div></div>';
+  if(sl.k==='recap')return h+'<ul class="vs-list">'+sl.items.map(function(x,k){return '<li class="vi"'+d(k)+'>'+esc(x)+'</li>'}).join('')+'</ul><div class="vs-task vi" style="animation-delay:'+(est*.6).toFixed(1)+'s">'+esc(g(sl.task))+'</div><div class="vs-note vi" style="animation-delay:'+(est*.8).toFixed(1)+'s">'+esc(sl.note)+'</div>';
+  return h;
+}
+function vidBlock(j,i){
+  var key=j+'-'+i,v=VID[key];
+  if(!v)return '<div class="video">'+ic('play',34)+'<div>סרטון ההסבר יתווסף כאן</div><div class="small" style="color:#B9BECB">בהדמיה בלי וידאו</div></div>';
+  var C=V.vid&&V.vid.key===key?V.vid:null,N=v.slides.length;
+  if(!C||(!C.on&&!C.started)||C.done){
+    return '<div class="vstage vposter"><div class="vs-h" style="font-size:20px">'+esc(v.title)+'</div><div class="vs-sub">'+(C&&C.done?'הסרטון הסתיים':'סרטון הסבר · כשתי דקות')+'</div><button class="vplay" data-a="vidplay" aria-label="'+(C&&C.done?'הפעל שוב':'הפעל סרטון')+'">'+ic('play',34)+'</button></div>';
+  }
+  var sl=v.slides[C.s],est=vidEst(sl);
+  var seg='<div class="vseg">'+v.slides.map(function(x,k){return '<i class="'+(k<C.s?'full':k===C.s?'cur':'')+'" '+(k===C.s?'style="animation-duration:'+est.toFixed(1)+'s"':'')+'></i>'}).join('')+'</div>';
+  var h='<div class="vstage'+(C.on?'':' paused')+'" id="vstage" aria-live="off"><div class="vslide">'+vidSlide(sl,est)+'</div>'+seg+'</div>'+
+   '<div class="row" style="justify-content:center;gap:8px"><button class="btn" data-a="vidprev" aria-label="שקופית קודמת" style="min-height:40px"'+(C.s?'':' disabled')+'>›</button>'+
+   '<button class="btn primary" data-a="vidplay" style="min-height:40px;min-width:110px">'+(C.on?'השהה':'המשך')+'</button>'+
+   '<button class="btn" data-a="vidnext" aria-label="שקופית הבאה" style="min-height:40px"'+(C.s<N-1?'':' disabled')+'>‹</button>'+
+   '<button class="btn" data-a="vidcap" aria-pressed="'+(C.cap!==false)+'" style="min-height:40px">כתוביות</button></div>'+
+   '<div class="small" style="text-align:center">שקופית '+(C.s+1)+' מתוך '+N+'</div>';
+  if(C.cap!==false)h+='<div class="vcap">'+esc(g(sl.narr))+'</div>';
+  return h;
+}
+function vidSpeak(){
+  var C=V.vid;if(!C)return;var v=VID[C.key],sl=v.slides[C.s];
+  stopVoice();var tok=++seqTok;
+  playOne({aid:'vid-'+C.key+'-'+(C.s+1),t:g(sl.narr),l:'he-IL'},function(){
+    if(tok!==seqTok||V.vid!==C||!C.on)return;
+    if(!(V.lesson&&V.lesson.j+'-'+V.lesson.i===C.key&&V.step===0))return;
+    setTimeout(function(){
+      if(tok!==seqTok)return;
+      if(C.s<v.slides.length-1){C.s++;render();vidSpeak()}else{C.on=false;C.done=true;render()}
+    },500);
+  });
+}
+/*VIDUI-END*/
+
 function vSayPr(){
   if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
   var list=CARDS.filter(function(c){return c.tr===V.filter});if(V.card>=list.length)V.card=0;var c=list[V.card],id=c.k;
@@ -669,8 +769,8 @@ document.addEventListener('click',function(e){
   else if(a==='tab'){stopVoice();V.coach=null;V.said='';V.score=null;V.msg='';V.tab=id;V.lesson=null;V.notice=''}
   else if(a==='journey'){S.journey=id;save()}
   else if(a==='start'){V.tab='lessons';V.lesson={j:S.journey,i:i};V.step=0;V.answer='';V.feedback=null;if(!hasAccess()){V.lesson=null}}
-  else if(a==='open'){V.lesson={j:b.dataset.j,i:i};V.step=0;V.answer='';V.feedback=null}
-  else if(a==='back'){V.lesson=null}
+  else if(a==='open'){stopVoice();V.lesson={j:b.dataset.j,i:i};V.step=0;V.answer='';V.feedback=null}
+  else if(a==='back'){stopVoice();V.lesson=null}
   else if(a==='next'){
     stopVoice();V.msg='';var ta=document.getElementById('ans');if(ta)V.answer=ta.value;
     if(V.step===1)V.feedback=null;
@@ -681,6 +781,10 @@ document.addEventListener('click',function(e){
   else if(a==='nextcard'){stopVoice();V.card++;V.reveal=false;V.said='';V.score=null;V.msg=''}
   else if(a==='save'){var l=CARDS.filter(function(c){return c.tr===V.filter})[V.card];var k=S.saved.indexOf(l.k);if(k>-1)S.saved.splice(k,1);else S.saved.push(l.k);save()}
   else if(a==='goback'){stopVoice();var sn=NAV.pop();V.msg='';if(sn){var ob=JSON.parse(sn);for(var kk2 in ob)V[kk2]=ob[kk2]}}
+  else if(a==='vidplay'){var vk=V.lesson.j+'-'+V.lesson.i;if(!V.vid||V.vid.key!==vk||V.vid.done){V.vid={key:vk,s:0,on:true,started:true,cap:V.vid&&V.vid.cap===false?false:true};vidSpeak()}else if(V.vid.on){V.vid.on=false;stopVoice()}else{V.vid.on=true;vidSpeak()}}
+  else if(a==='vidnext'){if(V.vid&&V.vid.s<VID[V.vid.key].slides.length-1){V.vid.s++;if(V.vid.on)vidSpeak();else stopVoice()}}
+  else if(a==='vidprev'){if(V.vid&&V.vid.s>0){V.vid.s--;if(V.vid.on)vidSpeak();else stopVoice()}}
+  else if(a==='vidcap'){if(V.vid)V.vid.cap=V.vid.cap===false}
   else if(a==='saytab'){stopVoice();V.coach=null;V.sayTab=id;V.msg='';V.said=''}
   else if(a==='sxpick'){stopVoice();V.sx=i}
   else if(a==='sxlang'){stopVoice();V.sxl=id;V.sx=sxList()[0]||0}
