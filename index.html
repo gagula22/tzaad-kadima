@@ -1,0 +1,471 @@
+<title>צעד קדימה</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centered phone-width column, bottom tab bar, works on desktop and phone */
+:root{
+  --bg:#F6F4EF; --surface:#FFFFFF; --line:#E3DFD5; --fg:#1B1F2A; --muted:#4B5160;
+  --accent:#0F766E; --accent-fg:#FFFFFF; --accent-soft:#DDF0EC; --warm:#B45309; --warm-soft:#FBEBDD; --warm-fg:#3A2A1C;
+  --bad:#B42318; --good:#0B6B3A; --dark-card:#1B1F2A;
+  --font:'Heebo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12151C; --surface:#1B1F2A; --line:#2D3342; --fg:#F1EFE9; --muted:#AEB3C0;
+  --accent:#2DB3A5; --accent-fg:#06201D; --accent-soft:#14302D; --warm:#F0A15E; --warm-soft:#33261A; --warm-fg:#F6E3D0;
+  --bad:#F3796F; --good:#58D18F; --dark-card:#0B0D12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12151C; --surface:#1B1F2A; --line:#2D3342; --fg:#F1EFE9; --muted:#AEB3C0;
+  --accent:#2DB3A5; --accent-fg:#06201D; --accent-soft:#14302D; --warm:#F0A15E; --warm-soft:#33261A; --warm-fg:#F6E3D0;
+  --bad:#F3796F; --good:#58D18F; --dark-card:#0B0D12; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.5;direction:rtl;text-align:right;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+h1,h2,h3{margin:0;text-wrap:balance}
+.app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+main{flex:1;padding-block:20px 96px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.small{font-size:13px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.hero{background:var(--accent);color:var(--accent-fg);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.btn{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-weight:700;padding:0 20px;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:transparent}
+.btn.dark{background:var(--fg);color:var(--bg);border-color:transparent}
+.btn.light{background:#fff;color:#0F5C56;border-color:transparent}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,.tab:focus-visible,.opt:focus-visible,.chip:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+.row{display:flex;gap:10px;align-items:center;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pill{display:inline-flex;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:700;font-size:14px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:500;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:transparent;font-weight:700}
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.hero .bar{background:rgba(255,255,255,.28)}.hero .bar>i{background:#fff}
+.opt{display:block;width:100%;text-align:right;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px 16px;min-height:48px;cursor:pointer;margin-bottom:8px;font-weight:500}
+.opt[aria-pressed="true"]{border:2px solid var(--accent);background:var(--accent-soft);font-weight:700}
+nav.tabs{position:fixed;inset:auto 0 0 0;background:var(--surface);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));z-index:5}
+nav.tabs .in{max-width:480px;margin:0 auto;display:flex;justify-content:space-around}
+.tab{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;min-height:48px;color:var(--muted);font-size:12px;cursor:pointer;border-radius:12px}
+.tab[aria-current="page"]{color:var(--accent);font-weight:700}
+.say-bad{font-size:20px;color:var(--muted);text-decoration:line-through;text-decoration-color:var(--bad)}
+.say-good{background:var(--accent);color:var(--accent-fg);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.say-good b{font-size:24px;line-height:1.3}
+.video{height:170px;border-radius:18px;background:var(--dark-card);color:#E8E6DF;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:12px}
+textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:12px;resize:vertical}
+input[type=text],input[type=date]{width:100%;min-height:48px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:0 12px}
+.notice{background:var(--warm-soft);color:var(--warm-fg);border-radius:18px;padding:16px}
+.status{display:inline-block;border-radius:999px;padding:3px 12px;font-weight:700;font-size:13px}
+.s-ok{background:var(--accent-soft);color:var(--accent)}
+.s-wait{background:var(--warm-soft);color:var(--warm)}
+.plan{display:flex;align-items:center;gap:12px;width:100%;text-align:right;border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:16px;cursor:pointer;margin-bottom:10px}
+.plan[aria-pressed="true"]{border:2px solid var(--accent)}
+.plan b{font-size:20px}
+.seg{display:flex;gap:6px}
+.seg .chip{flex:1;text-align:center}
+.themebtn{background:none;border:1px solid var(--line);border-radius:12px;min-height:40px;padding:0 12px;cursor:pointer;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.card,.hero{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+/* ---------- data ---------- */
+/* ---------- content: every gendered text is written twice, masculine (m) and feminine (f). No automatic conversion. ---------- */
+function P(m,f){return {m:m,f:f}}
+var JOURNEYS=[
+ {id:'ch',name:'תקשורת וכריזמה',stage:'גרסה ראשונה',blurb:'רושם ראשוני, קול, הקשבה והשפעה',lessons:[
+  {t:'רושם ראשוני ושפת גוף',
+   idea:P('בשלוש השניות הראשונות מחליטים עליך. עמידה יציבה, מבט ישיר וחיוך קצר משדרים ביטחון עוד לפני המילה הראשונה.','בשלוש השניות הראשונות מחליטים עלייך. עמידה יציבה, מבט ישיר וחיוך קצר משדרים ביטחון עוד לפני המילה הראשונה.'),
+   ex:P('תאר איך תיכנס לפגישה הבאה: עמידה, מבט והמשפט הראשון.','תארי איך תיכנסי לפגישה הבאה: עמידה, מבט והמשפט הראשון.'),
+   ph:P('למשל: אכנס, אסתכל על כולם ואגיד: בוקר טוב, נתחיל.','למשל: אכנס, אסתכל על כולם ואגיד: בוקר טוב, נתחיל.')},
+  {t:'קול ודיבור',
+   idea:P('קצב איטי יותר ועצירה קצרה לפני משפט חשוב נשמעים סמכותיים. קול גבוה ומהיר משדר לחץ.','קצב איטי יותר ועצירה קצרה לפני משפט חשוב נשמעים סמכותיים. קול גבוה ומהיר משדר לחץ.'),
+   ex:P('כתוב משפט מרכזי שתרצה להדגיש, וסמן איפה תעצור.','כתבי משפט מרכזי שתרצי להדגיש, וסמני איפה תעצרי.'),
+   ph:P('למשל: ההחלטה שלנו היא... (עצירה) לדחות.','למשל: ההחלטה שלנו היא... (עצירה) לדחות.')},
+  {t:'שיחת חולין והקשבה',
+   idea:P('שאלה פתוחה אחת וקשב אמיתי יוצרים חיבור מהר יותר מסיפור על עצמך. שואלים "איך היה...?" ולא "היה טוב?".','שאלה פתוחה אחת וקשב אמיתי יוצרים חיבור מהר יותר מסיפור על עצמך. שואלים "איך היה...?" ולא "היה טוב?".'),
+   ex:P('כתוב שתי שאלות פתוחות שתשאל מישהו בהפסקת קפה.','כתבי שתי שאלות פתוחות שתשאלי מישהו בהפסקת קפה.'),
+   ph:P('למשל: איך עבר עליך השבוע? מה הכי הצחיק אותך?','למשל: איך עבר עליך השבוע? מה הכי הצחיק אותך?')},
+  {t:'השפעה וסיפור',
+   idea:P('עובדה נשכחת, סיפור נזכר. סיפור קצר בשלושה חלקים: מצב, בעיה, פתרון.','עובדה נשכחת, סיפור נזכר. סיפור קצר בשלושה חלקים: מצב, בעיה, פתרון.'),
+   ex:P('כתוב סיפור של שלושה משפטים שמסביר למה כדאי לשנות משהו בעבודה.','כתבי סיפור של שלושה משפטים שמסביר למה כדאי לשנות משהו בעבודה.'),
+   ph:P('למשל: בפרויקט הקודם... הבעיה הייתה... ופתרנו כך...','למשל: בפרויקט הקודם... הבעיה הייתה... ופתרנו כך...')}]},
+ {id:'th',name:'אימון חשיבה',stage:'השקה',blurb:'זיכרון, מיקוד, החלטות וחשיבה ביקורתית',lessons:[
+  {t:'זיכרון',
+   idea:P('זוכרים טוב יותר כשיוצרים תמונה מוזרה ומקשרים אותה למקום מוכר. כך זוכרים רשימה בלי לחזור עליה.','זוכרים טוב יותר כשיוצרים תמונה מוזרה ומקשרים אותה למקום מוכר. כך זוכרים רשימה בלי לחזור עליה.'),
+   ex:P('קשר שלושה פריטים מהרשימה שלך לשלושה חדרים בבית.','קשרי שלושה פריטים מהרשימה שלך לשלושה חדרים בבית.'),
+   ph:P('למשל: חלב בכניסה, ביצים במטבח, לחם בסלון.','למשל: חלב בכניסה, ביצים במטבח, לחם בסלון.')},
+  {t:'מיקוד',
+   idea:P('משימה אחת בכל פעם, בלי התראות. עשרים וחמש דקות של עבודה ואז הפסקה קצרה.','משימה אחת בכל פעם, בלי התראות. עשרים וחמש דקות של עבודה ואז הפסקה קצרה.'),
+   ex:P('בחר משימה אחת להיום וכתוב מה תכבה בזמן שאתה עובד עליה.','בחרי משימה אחת להיום וכתבי מה תכבי בזמן שאת עובדת עליה.'),
+   ph:P('למשל: כותב את ההצעה, מכבה טלפון וטאבים.','למשל: כותבת את ההצעה, מכבה טלפון וטאבים.')},
+  {t:'קבלת החלטות',
+   idea:P('החלטה טובה מתחילה בשאלה: מה אני מנסה להשיג? ואז משווים שתי אפשרויות לפי שלושה קריטריונים.','החלטה טובה מתחילה בשאלה: מה אני מנסה להשיג? ואז משווים שתי אפשרויות לפי שלושה קריטריונים.'),
+   ex:P('כתוב החלטה שעומדת לפניך ושלושה קריטריונים להשוואה.','כתבי החלטה שעומדת לפנייך ושלושה קריטריונים להשוואה.'),
+   ph:P('למשל: עלות, זמן, סיכון.','למשל: עלות, זמן, סיכון.')},
+  {t:'חשיבה ביקורתית',
+   idea:P('לפני שמקבלים טענה שואלים: מי אומר, על סמך מה, ומה היה משכנע אותי שהיא שגויה?','לפני שמקבלים טענה שואלים: מי אומר, על סמך מה, ומה היה משכנע אותי שהיא שגויה?'),
+   ex:P('בחר טענה ששמעת השבוע וכתוב מה היה מפריך אותה.','בחרי טענה ששמעת השבוע וכתבי מה היה מפריך אותה.'),
+   ph:P('למשל: "כולם עוברים לזה". מה הנתון?','למשל: "כולם עוברים לזה". מה הנתון?')}]},
+ {id:'br',name:'יצירת תוכן ומיתוג אישי',stage:'אחרי השקה',blurb:'נישה, הוקים, אלגוריתם ועקביות',lessons:[
+  {t:'נישה וקהל',
+   idea:P('מי שמדבר לכולם לא מדבר לאף אחד. מגדירים אדם אחד, הבעיה שלו, והתוצאה שהוא רוצה.','מי שמדבר לכולם לא מדבר לאף אחד. מגדירים אדם אחד, הבעיה שלו, והתוצאה שהוא רוצה.'),
+   ex:P('כתוב משפט אחד: אני עוזר ל... להשיג...','כתבי משפט אחד: אני עוזרת ל... להשיג...'),
+   ph:P('למשל: אני עוזר למנהלים חדשים לנהל ישיבות בלי לאבד שליטה.','למשל: אני עוזרת למנהלים חדשים לנהל ישיבות בלי לאבד שליטה.')},
+  {t:'הוקים ותסריט',
+   idea:P('שלוש השניות הראשונות מחליטות. פותחים בבעיה או בהפתעה, ואז נותנים ערך.','שלוש השניות הראשונות מחליטות. פותחים בבעיה או בהפתעה, ואז נותנים ערך.'),
+   ex:P('כתוב פתיחה של סרטון קצר בנושא שלך.','כתבי פתיחה של סרטון קצר בנושא שלך.'),
+   ph:P('למשל: המשפט הזה הורס לך כל ישיבה.','למשל: המשפט הזה הורס לך כל ישיבה.')},
+  {t:'אלגוריתם',
+   idea:P('הפלטפורמות מעדיפות תוכן שאנשים צופים בו עד הסוף ומשתפים. ממדדים מה נצפה ומכפילים.','הפלטפורמות מעדיפות תוכן שאנשים צופים בו עד הסוף ומשתפים. ממדדים מה נצפה ומכפילים.'),
+   ex:P('כתוב איזה מדד תבדוק אחרי שבוע, ומה תעשה אם הוא נמוך.','כתבי איזה מדד תבדקי אחרי שבוע, ומה תעשי אם הוא נמוך.'),
+   ph:P('למשל: אחוז צפייה עד הסוף. אם נמוך, אקצר את ההקדמה.','למשל: אחוז צפייה עד הסוף. אם נמוך, אקצר את ההקדמה.')},
+  {t:'עקביות',
+   idea:P('קצב קבוע קטן מנצח התלהבות חד-פעמית. מתכננים שבוע תוכן אחד מראש ומשתמשים שוב בנכסים קיימים.','קצב קבוע קטן מנצח התלהבות חד-פעמית. מתכננים שבוע תוכן אחד מראש ומשתמשים שוב בנכסים קיימים.'),
+   ex:P('קבע קצב שבועי שתוכל לעמוד בו.','קבעי קצב שבועי שתוכלי לעמוד בו.'),
+   ph:P('למשל: שלוש פרסומות בשבוע, ביום ראשון, שלישי וחמישי.','למשל: שלוש פרסומות בשבוע, ביום ראשון, שלישי וחמישי.')}]},
+ {id:'tr',name:'מסחר ופיננסים',stage:'אחרי השקה',blurb:'פסיכולוגיה, סיכון, קריאת גרף ושיטת וויקוף. תוכן חינוכי בלבד',lessons:[
+  {t:'פסיכולוגיית מסחר',
+   idea:P('רוב ההפסדים נובעים מהתנהגות ולא מניתוח: כניסה מפחד להחמיץ, וחוסר יכולת לצאת בהפסד. תוכנית כתובה מקטינה החלטות רגשיות.','רוב ההפסדים נובעים מהתנהגות ולא מניתוח: כניסה מפחד להחמיץ, וחוסר יכולת לצאת בהפסד. תוכנית כתובה מקטינה החלטות רגשיות.'),
+   ex:P('כתוב כלל אחד שימנע ממך כניסה מתוך FOMO.','כתבי כלל אחד שימנע ממך כניסה מתוך FOMO.'),
+   ph:P('למשל: לא נכנס בלי תרחיש כתוב ויעד סטופ.','למשל: לא נכנסת בלי תרחיש כתוב ויעד סטופ.')},
+  {t:'ניהול סיכונים',
+   idea:P('קובעים מראש כמה מההון מסכנים בעסקה אחת. גודל הפוזיציה נגזר מהסטופ ולא מהתחושה.','קובעים מראש כמה מההון מסכנים בעסקה אחת. גודל הפוזיציה נגזר מהסטופ ולא מהתחושה.'),
+   ex:P('כתוב אחוז הסיכון המרבי שלך לעסקה, והסבר למה.','כתבי אחוז הסיכון המרבי שלך לעסקה, והסבירי למה.'),
+   ph:P('למשל: אחוז אחד מההון, כדי לשרוד רצף הפסדים.','למשל: אחוז אחד מההון, כדי לשרוד רצף הפסדים.')},
+  {t:'קריאת גרף',
+   idea:P('גרף מספר איפה היה ביקוש ואיפה היה היצע. מתחילים מהמבנה הגדול ורק אחר כך יורדים לפרטים.','גרף מספר איפה היה ביקוש ואיפה היה היצע. מתחילים מהמבנה הגדול ורק אחר כך יורדים לפרטים.'),
+   ex:P('תאר במשפט מה אתה רואה בגרף יומי של נכס שאתה מכיר.','תארי במשפט מה את רואה בגרף יומי של נכס שאת מכירה.'),
+   ph:P('למשל: טווח צדדי אחרי עלייה, נפח יורד.','למשל: טווח צדדי אחרי עלייה, נפח יורד.')},
+  {t:'שיטת וויקוף',
+   idea:P('מחזור שוק של צבירה, עלייה, חלוקה וירידה. מחפשים את סימני הצבירה והחלוקה בנפח ובמחיר.','מחזור שוק של צבירה, עלייה, חלוקה וירידה. מחפשים את סימני הצבירה והחלוקה בנפח ובמחיר.'),
+   ex:P('כתוב באיזה שלב של המחזור נמצא נכס שאתה עוקב אחריו, ומה סימן אותו.','כתבי באיזה שלב של המחזור נמצא נכס שאת עוקבת אחריו, ומה סימן אותו.'),
+   ph:P('למשל: צבירה, בדיקת היצע נמוך בנפח.','למשל: צבירה, בדיקת היצע נמוך בנפח.')}]},
+ {id:'ld',name:'מנהיגות',stage:'בהמשך',blurb:'מעמית למנהל: 6 פרקים',lessons:[
+  {t:'מעמית למנהל',
+   idea:P('המעבר מביצוע להובלה: התוצאה שלך היא התוצאה של הצוות. מגדירים מחדש מה נחשב הצלחה.','המעבר מביצוע להובלה: התוצאה שלך היא התוצאה של הצוות. מגדירים מחדש מה נחשב הצלחה.'),
+   ex:P('כתוב מה תפסיק לעשות בעצמך ומה תעביר לצוות.','כתבי מה תפסיקי לעשות בעצמך ומה תעבירי לצוות.'),
+   ph:P('למשל: אפסיק לכתוב דוחות ואלמד מישהו לעשות זאת.','למשל: אפסיק לכתוב דוחות ואלמד מישהו לעשות זאת.')},
+  {t:'תקשורת של מנהל',
+   idea:P('ציפייה ברורה: מה, עד מתי, ומה נחשב טוב. משוב קצר ומיידי עדיף על שיחה גדולה פעם ברבעון.','ציפייה ברורה: מה, עד מתי, ומה נחשב טוב. משוב קצר ומיידי עדיף על שיחה גדולה פעם ברבעון.'),
+   ex:P('נסח ציפייה ברורה למשימה אחת.','נסחי ציפייה ברורה למשימה אחת.'),
+   ph:P('למשל: אני צריך טיוטה עד חמישי, בעמוד אחד.','למשל: אני צריכה טיוטה עד חמישי, בעמוד אחד.')},
+  {t:'האצלה וצוות',
+   idea:P('מאציל את התוצאה ולא את הדרך, וקובע נקודת בדיקה אחת. כך האחריות עוברת באמת.','מאציל את התוצאה ולא את הדרך, וקובע נקודת בדיקה אחת. כך האחריות עוברת באמת.'),
+   ex:P('בחר משימה להאצלה וכתוב את נקודת הבדיקה.','בחרי משימה להאצלה וכתבי את נקודת הבדיקה.'),
+   ph:P('למשל: נבדוק ביום שלישי אחרי שהטיוטה מוכנה.','למשל: נבדוק ביום שלישי אחרי שהטיוטה מוכנה.')},
+  {t:'החלטות בלחץ',
+   idea:P('בלחץ מצמצמים: מה ידוע, מה לא, ומה ההחלטה ההפיכה ביותר. מחליטים ומעדכנים.','בלחץ מצמצמים: מה ידוע, מה לא, ומה ההחלטה ההפיכה ביותר. מחליטים ומעדכנים.'),
+   ex:P('כתוב החלטה לחוצה ואת שלוש השאלות מהפרק.','כתבי החלטה לחוצה ואת שלוש השאלות מהפרק.'),
+   ph:P('למשל: ידוע שהלקוח כועס. לא ידוע מה הדרישה.','למשל: ידוע שהלקוח כועס. לא ידוע מה הדרישה.')},
+  {t:'השראה',
+   idea:P('צוות נע כשהוא מבין למה. מסבירים את המטרה לפני המשימה ומחברים כל אחד לתרומה שלו.','צוות נע כשהוא מבין למה. מסבירים את המטרה לפני המשימה ומחברים כל אחד לתרומה שלו.'),
+   ex:P('כתוב משפט אחד שמסביר למה הפרויקט שלך חשוב.','כתבי משפט אחד שמסביר למה הפרויקט שלך חשוב.'),
+   ph:P('למשל: כך הלקוחות יחסכו שעה ביום.','למשל: כך הלקוחות יחסכו שעה ביום.')},
+  {t:'הובלת שינוי',
+   idea:P('שינוי נתקע בגלל הפחד ולא בגלל התוכנית. מתחילים בניצחון קטן וגלוי.','שינוי נתקע בגלל הפחד ולא בגלל התוכנית. מתחילים בניצחון קטן וגלוי.'),
+   ex:P('כתוב שינוי אחד ואת הצעד הראשון הקטן שלו.','כתבי שינוי אחד ואת הצעד הראשון הקטן שלו.'),
+   ph:P('למשל: ישיבת בוקר של עשר דקות לשבועיים.','למשל: ישיבת בוקר של עשר דקות לשבועיים.')}]}
+];
+var CARDS=[
+ {k:'c01',tr:'he',ctx:'ישיבות בעבודה',bad:P('אני לא בטוח, אבל אולי...','אני לא בטוחה, אבל אולי...'),good:P('ההמלצה שלי היא...','ההמלצה שלי היא...'),tag:'ביטחון'},
+ {k:'c02',tr:'he',ctx:'ישיבות בעבודה',bad:P('סליחה שאני מפריע','סליחה שאני מפריעה'),good:P('יש לי נקודה חשובה, זה ייקח דקה','יש לי נקודה חשובה, זה ייקח דקה'),tag:'ערך'},
+ {k:'c03',tr:'he',ctx:'ישיבות בעבודה',bad:P('זה רק רעיון קטן שלי','זה רק רעיון קטן שלי'),good:P('יש לי הצעה לשיפור','יש לי הצעה לשיפור'),tag:'ביטחון'},
+ {k:'c04',tr:'he',ctx:'שיחות קשות',bad:P('אתה תמיד מאחר','אתה תמיד מאחר'),good:P('בשבוע האחרון איחרת שלוש פעמים. אני רוצה להבין מה קורה','בשבוע האחרון איחרת שלוש פעמים. אני רוצה להבין מה קורה'),tag:'בהירות'},
+ {k:'c05',tr:'he',ctx:'שיחות קשות',bad:P('אני לא מסכים איתך','אני לא מסכימה איתך'),good:P('אני רואה את זה אחרת. הנה למה','אני רואה את זה אחרת. הנה למה'),tag:'כבוד'},
+ {k:'c06',tr:'he',ctx:'משא ומתן',bad:P('אפשר אולי הנחה קטנה?','אפשר אולי הנחה קטנה?'),good:P('כדי לסגור היום, אני צריך מחיר של...','כדי לסגור היום, אני צריכה מחיר של...'),tag:'סמכות'},
+ {k:'c07',tr:'en',ctx:'English',bad:P('Sorry, sorry, I have a question','Sorry, sorry, I have a question'),good:P('I have a quick question','I have a quick question'),tag:'Confidence'},
+ {k:'c08',tr:'en',ctx:'English',bad:P('Send me the file','Send me the file'),good:P('Could you send me the file by Thursday?','Could you send me the file by Thursday?'),tag:'Polite'},
+ {k:'c09',tr:'en',ctx:'English',bad:P('I think maybe we can try','I think maybe we can try'),good:P('I recommend that we try','I recommend that we try'),tag:'Decisive'},
+ {k:'c10',tr:'il',ctx:'אנגלית של ישראלים',bad:P('I am agree with you','I am agree with you'),good:P('I agree with you','I agree with you'),tag:'דקדוק'},
+ {k:'c11',tr:'il',ctx:'אנגלית של ישראלים',bad:P('I have 35 years old','I have 35 years old'),good:P('I am 35 years old','I am 35 years old'),tag:'דקדוק'},
+ {k:'c12',tr:'il',ctx:'אנגלית של ישראלים',bad:P("Let's make a meeting","Let's make a meeting"),good:P("Let's set up a meeting","Let's set up a meeting"),tag:'ניסוח'}
+];
+var PLANS=[{id:'m',name:'חודש',price:15,per:15},{id:'h',name:'חצי שנה',price:75,per:12.5},{id:'y',name:'שנה שלמה',price:150,per:12.5}];
+var QUIZ=[
+ {q:P('מה המגדר שלך? נתאים אליו את כל הניסוחים באפליקציה','מה המגדר שלך? נתאים אליו את כל הניסוחים באפליקציה'),o:[P('גבר','גבר'),P('אישה','אישה')]},
+ {q:P('מה הכי חשוב לך לשפר?','מה הכי חשוב לך לשפר?'),o:[P('תקשורת וכריזמה','תקשורת וכריזמה'),P('חשיבה ומיקוד','חשיבה ומיקוד'),P('תוכן ומיתוג אישי','תוכן ומיתוג אישי'),P('מסחר ופיננסים','מסחר ופיננסים'),P('מנהיגות','מנהיגות')]},
+ {q:P('כמה זמן ביום יש לך?','כמה זמן ביום יש לך?'),o:[P('5 דקות','5 דקות'),P('10 עד 15 דקות','10 עד 15 דקות'),P('יותר מ-15 דקות','יותר מ-15 דקות')]},
+ {q:P('איפה אתה עכשיו?','איפה את עכשיו?'),o:[P('מתחיל מאפס','מתחילה מאפס'),P('יודע קצת','יודעת קצת'),P('מתקדם ורוצה לדייק','מתקדמת ורוצה לדייק')]}
+];
+
+/* ---------- state ---------- */
+function today(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+var KEY='tzaad-kadima-v4';
+var S=load()||{gender:'m',quizDone:false,quiz:[0,0,0,0],journey:'ch',done:{},streak:0,last:'',saved:[],
+  role:'beta',paySwitch:'off',betaEnd:addDays(14),extendedUntil:'',purchased:false,fee:'buyer'};
+function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var V={tab:'home',lesson:null,step:0,answer:'',feedback:null,card:0,filter:'he',reveal:false,qi:0,plan:'h',method:'bit',notice:'',msg:'',listening:false,mode:'',said:'',score:null};
+
+function hasAccess(){
+  if(S.role==='owner'||S.purchased)return true;
+  var t=today();
+  if(S.extendedUntil&&t<=S.extendedUntil)return true;
+  return S.paySwitch!=='active'&&t<=S.betaEnd;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function J(){return JOURNEYS.filter(function(j){return j.id===S.journey})[0]||JOURNEYS[0]}
+function doneCount(j){return j.lessons.filter(function(_,i){return S.done[j.id+i]}).length}
+function nextLesson(){var j=J();for(var i=0;i<j.lessons.length;i++){if(!S.done[j.id+i])return i}return -1}
+
+var ICON={
+ home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>',
+ chat:'<path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ vol:'<path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+ flame:'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/>',
+ play:'<path d="M8 5v14l11-7z" fill="currentColor"/>',
+ mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'
+};
+function ic(n,s){return '<svg width="'+(s||24)+'" height="'+(s||24)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[n]+'</svg>'}
+
+
+
+/* ---------- gender: explicit text for every gendered string. g() picks a version, no text is derived. ---------- */
+function gk(){return S.gender==='f'?'f':'m'}
+function g(x){return (x&&typeof x==='object')?x[gk()]:x}
+var U={
+ ready:P('מוכן להתקדם היום?','מוכנה להתקדם היום?'),
+ startLesson:P('התחל שיעור','התחילי שיעור'),
+ readAloud:P('הקרא בקול','הקראי בקול'),
+ readEx:P('הקרא את התרגיל','הקראי את התרגיל'),
+ readGood:P('הקרא את הניסוח החזק','הקראי את הניסוח החזק'),
+ stopRec:P('עצור הקלטה','עצרי הקלטה'),
+ answerAloud:P('ענה בקול','עני בקול'),
+ iosTitle:P('באייפון: ענה בקול דרך המקלדת','באייפון: עני בקול דרך המקלדת'),
+ iosBody:P('לחץ בתוך תיבת התשובה, ואז על סמל המיקרופון במקלדת של האייפון, ודבר בעברית. הכתבה בתוך הדפדפן באייפון לא יציבה.','לחצי בתוך תיבת התשובה, ואז על סמל המיקרופון במקלדת של האייפון, ודברי בעברית. הכתבה בתוך הדפדפן באייפון לא יציבה.'),
+ dictHint:P('דבר בעברית והטקסט נכתב לתיבה. אפשר לערוך אותו אחר כך.','דברי בעברית והטקסט נכתב לתיבה. אפשר לערוך אותו אחר כך.'),
+ getFeedback:P('קבל משוב','קבלי משוב'),
+ cont:P('המשך','המשיכי'),
+ fbEmpty:P('לא כתבת תשובה. נסה לכתוב משפט אחד.','לא כתבת תשובה. נסי לכתוב משפט אחד.'),
+ fbHedge:P('המשפט שלך כולל ניסוח מהסס ("{w}"). נסה להחליף אותו בנוסח החלטי, למשל "ההמלצה שלי היא", ושמור על משפט אחד קצר.','המשפט שלך כולל ניסוח מהסס ("{w}"). נסי להחליף אותו בנוסח החלטי, למשל "ההמלצה שלי היא", ושמרי על משפט אחד קצר.'),
+ fbLong:P('הניסוח ברור, אבל ארוך. קצר אותו למשפט אחד ופתח בתשובה.','הניסוח ברור, אבל ארוך. קצרי אותו למשפט אחד ופתחי בתשובה.'),
+ fbGood:P('ניסוח חלק וחד. כדאי לומר אותו בקול פעם אחת לפני הישיבה.','ניסוח חלק וחד. כדאי לומר אותו בקול פעם אחת לפני הישיבה.'),
+ sayTitle:P('תגיד את זה נכון','תגידי את זה נכון'),
+ tabSay:P('תגיד נכון','תגידי נכון'),
+ say:P('תגיד','תגידי'),
+ reveal:P('הצג את הניסוח החזק','הציגי את הניסוח החזק'),
+ sayAloud:P('אמור את זה בקול','אמרי את זה בקול'),
+ saySub:P('אמור את הניסוח החזק, ונכתוב מה שמענו','אמרי את הניסוח החזק, ונכתוב מה שמענו'),
+ iosSay:P('באייפון: לחץ בתיבה, לחץ על סמל המיקרופון במקלדת ואמור את המשפט, ואז לחץ "בדוק".','באייפון: לחצי בתיבה, לחצי על סמל המיקרופון במקלדת ואמרי את המשפט, ואז לחצי "בדקי".'),
+ check:P('בדוק','בדקי'),
+ near:P(' קרוב. נסה שוב.',' קרוב. נסי שוב.'),
+ low:P(' נסה לומר את המשפט המלא.',' נסי לומר את המשפט המלא.'),
+ rec:P('התחל להקליט','התחילי להקליט'),
+ saveCard:P('שמור לחזרה','שמרי לחזרה'),
+ errPerm:P('אין הרשאה למיקרופון. אשר גישה בדפדפן, ואם הדף פתוח בתוך מסגרת או כקובץ מקומי, פתח אותו בכתובת אינטרנט רגילה.','אין הרשאה למיקרופון. אשרי גישה בדפדפן, ואם הדף פתוח בתוך מסגרת או כקובץ מקומי, פתחי אותו בכתובת אינטרנט רגילה.'),
+ errNoSpeech:P('לא שמעתי דיבור. נסה שוב.','לא שמעתי דיבור. נסי שוב.'),
+ choosePlan:P('בחר תוכנית','בחרי תוכנית'),
+ payGo:P('המשך לתשלום ב','המשיכי לתשלום ב'),
+ roleBeta:P('משתמש בדיקה','משתמשת בדיקה'),
+ expire:P('סיים את תקופת הבדיקה עכשיו','סיימי את תקופת הבדיקה עכשיו'),
+ extend:P('הארך','הארכי')
+};
+function u(k){var v=U[k];if(!v)throw new Error('missing ui text: '+k);return g(v)}
+/* completeness check: every explicit pair has both versions, and the two versions differ only where the text is gendered */
+function checkContent(){
+  var bad=[];
+  function chk(where,v){if(v&&typeof v==='object'){if(typeof v.m!=='string'||typeof v.f!=='string'||!v.m||!v.f)bad.push(where)}}
+  JOURNEYS.forEach(function(j){j.lessons.forEach(function(L,i){['idea','ex','ph'].forEach(function(f){if(typeof L[f]==='string')bad.push(j.id+'-'+(i+1)+'-'+f+' not a pair');chk(j.id+'-'+(i+1)+'-'+f,L[f])})})});
+  CARDS.forEach(function(c){['bad','good'].forEach(function(f){chk(c.k+'-'+f,c[f])})});
+  QUIZ.forEach(function(q,i){chk('quiz'+i,q.q);q.o.forEach(function(o,n){chk('quiz'+i+'.'+n,o)})});
+  Object.keys(U).forEach(function(k){chk('U.'+k,U[k])});
+  if(bad.length&&window.console)console.warn('content check failed:',bad);
+  return bad;
+}
+checkContent();
+
+/* ---------- voice: read aloud + dictation ---------- */
+var IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,dictBase='';
+function spk(t,l,label,aid){return '<button class="btn" data-a="speak" data-t="'+esc(t)+'" data-l="'+(l||'he-IL')+'" data-aid="'+(aid||'')+'" style="min-height:40px;padding:0 14px">'+ic('vol',18)+' '+(label||u('readAloud'))+'</button>'}
+/* recorded audio (made in advance, one file per text and gender); the browser voice stays as a fallback and for dynamic text */
+var AUDIO={'lesson-ch-1-title':['0e0a3b645662.mp3','0e0a3b645662.mp3'],'lesson-ch-1-idea':['e529d3904c6a.mp3','ae54c5e0ec7b.mp3'],'lesson-ch-1-ex':['ddd7cad54a5d.mp3','15cf81d7edfc.mp3'],'lesson-ch-2-title':['3d94f2d1d49b.mp3','3d94f2d1d49b.mp3'],'lesson-ch-2-idea':['5b8429e4d78b.mp3','5b8429e4d78b.mp3'],'lesson-ch-2-ex':['5c20516c3ab0.mp3','1dbcf194183b.mp3'],'lesson-ch-3-title':['d9bfed92c591.mp3','d9bfed92c591.mp3'],'lesson-ch-3-idea':['3b4b6805847d.mp3','3b4b6805847d.mp3'],'lesson-ch-3-ex':['62b261f4c456.mp3','72e842659bdf.mp3'],'lesson-ch-4-title':['4a4ce2b007a0.mp3','4a4ce2b007a0.mp3'],'lesson-ch-4-idea':['058ff95b6875.mp3','058ff95b6875.mp3'],'lesson-ch-4-ex':['03b365448360.mp3','f76a680a7d22.mp3'],'lesson-th-1-title':['179f68f41872.mp3','179f68f41872.mp3'],'lesson-th-1-idea':['9170158ae7ba.mp3','9170158ae7ba.mp3'],'lesson-th-1-ex':['98339e4d630b.mp3','8a1b682841fb.mp3'],'lesson-th-2-title':['46af5f8d16b5.mp3','46af5f8d16b5.mp3'],'lesson-th-2-idea':['0cfd28014b83.mp3','0cfd28014b83.mp3'],'lesson-th-2-ex':['5447c69c0a18.mp3','4e06eec28470.mp3'],'lesson-th-3-title':['ab93dde7776a.mp3','ab93dde7776a.mp3'],'lesson-th-3-idea':['4fb7fe4a3dd5.mp3','4fb7fe4a3dd5.mp3'],'lesson-th-3-ex':['3529d2c1c777.mp3','a7be1348e82d.mp3'],'lesson-th-4-title':['0ad736758828.mp3','0ad736758828.mp3'],'lesson-th-4-idea':['0b8393c672a7.mp3','0b8393c672a7.mp3'],'lesson-th-4-ex':['9dae65a75a45.mp3','562767ae849d.mp3'],'lesson-br-1-title':['615cf8f78aa9.mp3','615cf8f78aa9.mp3'],'lesson-br-1-idea':['9b413d6a510e.mp3','9b413d6a510e.mp3'],'lesson-br-1-ex':['a5d70b270a4e.mp3','7cfd8493caa0.mp3'],'lesson-br-2-title':['d81dff3d3b0e.mp3','d81dff3d3b0e.mp3'],'lesson-br-2-idea':['67f5e11f9d05.mp3','67f5e11f9d05.mp3'],'lesson-br-2-ex':['b86cd6630187.mp3','6dfbeda0fb60.mp3'],'lesson-br-3-title':['23063d3407a6.mp3','23063d3407a6.mp3'],'lesson-br-3-idea':['a6047199612b.mp3','a6047199612b.mp3'],'lesson-br-3-ex':['e2c8d0cc0154.mp3','13b36e75ae12.mp3'],'lesson-br-4-title':['3964bc0e0385.mp3','3964bc0e0385.mp3'],'lesson-br-4-idea':['10bdc312e4c8.mp3','10bdc312e4c8.mp3'],'lesson-br-4-ex':['283aa6027615.mp3','fe95e39585b8.mp3'],'lesson-tr-1-title':['c545dd0f9b51.mp3','c545dd0f9b51.mp3'],'lesson-tr-1-idea':['6757b2f9f767.mp3','6757b2f9f767.mp3'],'lesson-tr-1-ex':['51688ec5aff9.mp3','fc49d43abfca.mp3'],'lesson-tr-2-title':['e1f274ad7c2c.mp3','e1f274ad7c2c.mp3'],'lesson-tr-2-idea':['c20780488804.mp3','c20780488804.mp3'],'lesson-tr-2-ex':['a5414b9f16de.mp3','d50f7d2e6ac4.mp3'],'lesson-tr-3-title':['c6a59823157a.mp3','c6a59823157a.mp3'],'lesson-tr-3-idea':['daee0c4e1aca.mp3','daee0c4e1aca.mp3'],'lesson-tr-3-ex':['a50fd4e68f04.mp3','428a47fd11a7.mp3'],'lesson-tr-4-title':['a19ec60fabd9.mp3','a19ec60fabd9.mp3'],'lesson-tr-4-idea':['887c77d62969.mp3','887c77d62969.mp3'],'lesson-tr-4-ex':['ea370894d0e3.mp3','cda484a00de0.mp3'],'lesson-ld-1-title':['8e71394fca74.mp3','8e71394fca74.mp3'],'lesson-ld-1-idea':['75495c428a0b.mp3','75495c428a0b.mp3'],'lesson-ld-1-ex':['79e8f7599df4.mp3','435a48ea1d94.mp3'],'lesson-ld-2-title':['fc64466f5247.mp3','fc64466f5247.mp3'],'lesson-ld-2-idea':['43b4b02bfa9e.mp3','43b4b02bfa9e.mp3'],'lesson-ld-2-ex':['70024d62e8f8.mp3','681a37dfbb4f.mp3'],'lesson-ld-3-title':['3ee8f0a8597b.mp3','3ee8f0a8597b.mp3'],'lesson-ld-3-idea':['093cb2e1f4c7.mp3','093cb2e1f4c7.mp3'],'lesson-ld-3-ex':['b137e5a9e242.mp3','b992f8f31849.mp3'],'lesson-ld-4-title':['a07354f806ba.mp3','a07354f806ba.mp3'],'lesson-ld-4-idea':['5bf5a08997ba.mp3','5bf5a08997ba.mp3'],'lesson-ld-4-ex':['1c8d2f023da0.mp3','777e95276520.mp3'],'lesson-ld-5-title':['b48d2cc4613f.mp3','b48d2cc4613f.mp3'],'lesson-ld-5-idea':['17be03f6d696.mp3','17be03f6d696.mp3'],'lesson-ld-5-ex':['caf8239307aa.mp3','289aa226246c.mp3'],'lesson-ld-6-title':['a84b3a44b144.mp3','a84b3a44b144.mp3'],'lesson-ld-6-idea':['aec580c38388.mp3','aec580c38388.mp3'],'lesson-ld-6-ex':['40226eb2889d.mp3','b3cadb1e18cf.mp3'],'card-001-good':['4bbd3a4fa0b9.mp3','4bbd3a4fa0b9.mp3'],'card-001-bad':['1ef4b85b920c.mp3','f18850b06b74.mp3'],'card-002-good':['e2926e04163d.mp3','e2926e04163d.mp3'],'card-002-bad':['88678a5b50ed.mp3','0acd0c36121d.mp3'],'card-003-good':['d1456ca80737.mp3','d1456ca80737.mp3'],'card-003-bad':['d57470d56bf5.mp3','d57470d56bf5.mp3'],'card-004-good':['87c0740ce70a.mp3','87c0740ce70a.mp3'],'card-004-bad':['03f3b7cf4567.mp3','03f3b7cf4567.mp3'],'card-005-good':['28fab601b3a8.mp3','28fab601b3a8.mp3'],'card-005-bad':['0a0b95ae9c31.mp3','1bf71ee9186e.mp3'],'card-006-good':['fe2e397607b0.mp3','d975b696d669.mp3'],'card-006-bad':['a4f1a75f4348.mp3','a4f1a75f4348.mp3'],'card-007-good':['3a9ac04147b7.mp3','3a9ac04147b7.mp3'],'card-007-bad':['d7e4bad60b83.mp3','d7e4bad60b83.mp3'],'card-008-good':['f6225f8aba84.mp3','f6225f8aba84.mp3'],'card-008-bad':['125571842945.mp3','125571842945.mp3'],'card-009-good':['be8b200ee276.mp3','be8b200ee276.mp3'],'card-009-bad':['5369ef42c8b2.mp3','5369ef42c8b2.mp3'],'card-010-good':['e3b613b07b7a.mp3','e3b613b07b7a.mp3'],'card-010-bad':['11f9ae373db3.mp3','11f9ae373db3.mp3'],'card-011-good':['c3f2e2bcb7f6.mp3','c3f2e2bcb7f6.mp3'],'card-011-bad':['cc168f0c14cc.mp3','cc168f0c14cc.mp3'],'card-012-good':['6d37c4193b7a.mp3','6d37c4193b7a.mp3'],'card-012-bad':['b5c3487f7859.mp3','b5c3487f7859.mp3']};
+var clip=null;
+function playClip(aid,t,l){
+  if(!aid||!AUDIO[aid])return false;
+  stopVoice();
+  var a=new Audio('audio/'+AUDIO[aid][gk()==='f'?1:0]);clip=a;
+  a.onerror=function(){if(clip===a){clip=null;speak(t,l)}};
+  var pr=a.play();if(pr&&pr.catch)pr.catch(function(){if(clip===a){clip=null;speak(t,l)}});
+  return true;
+}
+function stopVoice(){if(clip){try{clip.pause()}catch(e){}clip=null}try{speechSynthesis.cancel()}catch(e){}if(rec){try{rec.onend=null;rec.onerror=null;rec.stop()}catch(e){}rec=null}V.listening=false}
+function speak(t,l){
+  if(!('speechSynthesis' in window)){V.msg='הדפדפן הזה לא תומך בהקראה.';return}
+  stopVoice();
+  var u=new SpeechSynthesisUtterance('\u2026 '+t);u.lang=l;u.rate=.95;
+  var vs=speechSynthesis.getVoices(),p=l.slice(0,2).toLowerCase();
+  var v=vs.filter(function(x){return x.lang.replace('_','-').toLowerCase().indexOf(p)===0})[0];
+  if(v)u.voice=v;else if(vs.length&&p==='he')V.msg='לא נמצא קול בעברית במכשיר. ב-Windows אפשר להוסיף אותו בהגדרות השפה והדיבור.';
+  /* a short delay after cancel() and a leading pause keep the engine from swallowing the first word */
+  setTimeout(function(){speechSynthesis.speak(u)},250);
+}
+function norm(x){return x.toLowerCase().replace(/[.,!?'"׳״\-־]/g,' ').split(/\s+/).filter(Boolean)}
+function similarity(target,said){var t=norm(target),w=norm(said);if(!t.length)return 0;var hit=t.filter(function(x){return w.indexOf(x)>-1}).length;return Math.round(hit/t.length*100)}
+function listen(lang,mode,target){
+  if(!SR){V.msg='הדפדפן הזה לא תומך בהקלטה והכתבה. מומלץ Chrome או Edge.';render();return}
+  stopVoice();
+  rec=new SR();rec.lang=lang;rec.interimResults=true;rec.continuous=(mode==='dict');
+  V.listening=true;V.mode=mode;V.msg='';if(mode==='card'){V.said='';V.score=null}
+  if(mode==='dict'){var ta=document.getElementById('ans');V.answer=ta?ta.value:V.answer;dictBase=V.answer}
+  rec.onresult=function(ev){
+    var txt='';for(var i=0;i<ev.results.length;i++)txt+=ev.results[i][0].transcript+' ';
+    txt=txt.trim();
+    if(mode==='dict'){V.answer=(dictBase?dictBase+' ':'')+txt;var a=document.getElementById('ans');if(a)a.value=V.answer}
+    else{V.said=txt;V.score=similarity(target,txt);var e=document.getElementById('said');if(e)e.textContent=txt}
+  };
+  rec.onerror=function(ev){
+    V.listening=false;
+    V.msg=ev.error==='not-allowed'||ev.error==='service-not-allowed'?u('errPerm'):ev.error==='no-speech'?u('errNoSpeech'):'ההקלטה נכשלה ('+ev.error+').';
+    render();
+  };
+  rec.onend=function(){V.listening=false;rec=null;render()};
+  try{rec.start()}catch(e){V.listening=false}
+  render();
+}
+
+/* ---------- views ---------- */
+function vQuiz(){
+  var q=QUIZ[V.qi];
+  var h='<main><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="'+V.qi+'"><i style="width:'+(V.qi/4*100)+'%"></i></div>'+
+   '<div class="small">שאלה '+(V.qi+1)+' מתוך 4</div><h1 style="font-size:26px">'+g(q.q)+'</h1><div>';
+  q.o.forEach(function(o,i){h+='<button class="opt" data-a="pick" data-i="'+i+'">'+g(o)+'</button>'});
+  return h+'</div></main>';
+}
+function vHome(){
+  var j=J(),n=nextLesson(),cnt=doneCount(j);
+  var h='<div class="top"><div><div class="small">בוקר טוב</div><h1 style="font-size:24px">'+u('ready')+'</h1></div><div class="pill" style="color:var(--warm)">'+ic('flame',18)+'<span style="color:var(--fg)">'+S.streak+' ימים ברצף</span></div></div>';
+  if(!hasAccess())h+=pendingNotice();
+  if(n>=0){
+    var L=j.lessons[n];
+    h+='<div class="hero"><div class="small" style="color:inherit;opacity:.9">השיעור של היום · 10 דקות</div><h2 style="font-size:26px">'+L.t+'</h2><div style="opacity:.95">'+j.name+', שיעור '+(n+1)+' מתוך '+j.lessons.length+'</div><div class="bar"><i style="width:'+(cnt/j.lessons.length*100)+'%"></i></div><button class="btn light" data-a="start" data-i="'+n+'" style="align-self:flex-start">'+u('startLesson')+'</button></div>';
+  }else h+='<div class="hero"><h2 style="font-size:24px">סיימת את המסע</h2><div>כל השיעורים ב"'+j.name+'" הושלמו. אפשר לעבור למסע אחר.</div></div>';
+  h+='<h2 style="font-size:18px">המסעות שלי</h2><div style="display:flex;flex-direction:column;gap:10px">';
+  JOURNEYS.forEach(function(x){h+='<button class="card row" style="cursor:pointer;text-align:right;border-width:'+(x.id===S.journey?'2px':'1px')+';border-color:'+(x.id===S.journey?'var(--accent)':'var(--line)')+'" data-a="journey" data-id="'+x.id+'"><span class="grow"><b>'+x.name+'</b><div class="small">'+x.blurb+'</div><div class="small">'+doneCount(x)+' מתוך '+x.lessons.length+' שיעורים</div></span><span class="status s-wait">'+x.stage+'</span></button>'});
+  h+='</div><button class="card row" style="cursor:pointer;text-align:right" data-a="tab" data-id="say"><span style="color:var(--warm)">'+ic('chat')+'</span><span class="grow"><b>תגיד את זה נכון</b><div class="small">'+CARDS.length+' ניסוחים לתרגול</div></span></button>';
+  return '<main>'+h+'</main>';
+}
+function pendingNotice(){return '<div class="notice"><b>החשבון ממתין לרכישה</b><div style="margin-top:4px">התוכן נעול, אבל החשבון וההתקדמות שמורים. אחרי הרכישה הכול חוזר מיד.</div><button class="btn primary" style="margin-top:10px" data-a="tab" data-id="me">לדף המחיר</button></div>'}
+function vLessons(){
+  if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
+  if(V.lesson===null){
+    var h='<h1 style="font-size:24px">שיעורים</h1>';
+    JOURNEYS.forEach(function(j){h+='<h2 style="font-size:18px">'+j.name+'</h2><div class="small">'+j.blurb+'</div>';
+      j.lessons.forEach(function(L,i){var d=S.done[j.id+i];h+='<button class="card row" style="cursor:pointer;text-align:right" data-a="open" data-j="'+j.id+'" data-i="'+i+'"><span class="grow"><b>'+L.t+'</b></span><span class="status '+(d?'s-ok':'s-wait')+'">'+(d?'הושלם':'לא התחלת')+'</span></button>'})});
+    return '<main>'+h+'</main>';
+  }
+  var j=JOURNEYS.filter(function(x){return x.id===V.lesson.j})[0],L=j.lessons[V.lesson.i],h='';
+  h+='<div class="row"><button class="btn" data-a="back" aria-label="חזרה">‹</button><div class="bar grow"><i style="width:'+((V.step+1)/4*100)+'%"></i></div><span class="small">'+(V.step+1)+' מתוך 4</span></div><div class="small" style="color:var(--accent);font-weight:700">'+j.name+'</div><h1 style="font-size:26px">'+L.t+'</h1>';
+  if(V.step===0)h+='<div class="video">'+ic('play',34)+'<div>סרטון ההסבר יתווסף כאן</div><div class="small" style="color:#B9BECB">בהדמיה בלי וידאו</div></div><div class="card"><b>הרעיון המרכזי</b><p style="margin:8px 0 10px">'+g(L.idea)+'</p>'+spk(g(L.idea),'he-IL',null,'lesson-'+j.id+'-'+(V.lesson.i+1)+'-idea')+'</div>';
+  if(V.step===1)h+='<div class="notice"><b>תרגיל של 2 דקות</b><div style="margin-top:4px">'+g(L.ex)+'</div></div><label for="ans" class="small">התשובה שלך</label><textarea id="ans" placeholder="'+esc(g(L.ph))+'">'+esc(V.answer)+'</textarea><div class="row wrap">'+spk(g(L.ex),'he-IL',u('readEx'),'lesson-'+j.id+'-'+(V.lesson.i+1)+'-ex')+'<button class="btn '+(V.listening&&V.mode==='dict'?'dark':'')+'" data-a="dict" style="min-height:40px;padding:0 14px">'+ic('mic',18)+' '+(V.listening&&V.mode==='dict'?u('stopRec'):u('answerAloud'))+'</button></div>'+(IOS?'<div class="notice" role="note"><b>'+u('iosTitle')+'</b><div style="margin-top:4px">'+u('iosBody')+'</div></div>':'<div class="small">'+u('dictHint')+'</div>');
+  if(V.step===2){var f=V.feedback||feedback(V.answer);V.feedback=f;h+='<div class="card"><b>המשוב</b><div class="small">משוב לדוגמה לפי כללים פשוטים. ה-AI האמיתי יחליף אותו.</div><p style="margin:8px 0 10px">'+f.text+'</p>'+spk(f.text,'he-IL')+'</div><div class="card"><div class="small">התשובה שלך</div><p style="margin:4px 0 0">'+esc(V.answer||'לא כתבת תשובה')+'</p></div>'}
+  if(V.step===3)h+='<div class="hero"><h2 style="font-size:24px">כל הכבוד</h2><div>השלמת את השיעור. הרצף שלך: '+S.streak+' ימים.</div></div>';
+  if(V.msg)h+='<div class="notice" role="status">'+V.msg+'</div>';h+='<div class="row"><button class="btn primary grow" data-a="next">'+(V.step===3?'סיום':V.step===1?u('getFeedback'):u('cont'))+'</button></div>';
+  return '<main>'+h+'</main>';
+}
+function feedback(a){
+  var t=(a||'').trim();if(!t)return{text:u('fbEmpty')};
+  var hedges=['אולי','נראה לי','אני לא בטוח','סליחה','קצת','only','maybe','sorry','just'],hit=hedges.filter(function(w){return t.toLowerCase().indexOf(w)>-1});
+  if(hit.length)return{text:u('fbHedge').replace('{w}',esc(hit[0]))};
+  if(t.length>140)return{text:u('fbLong')};
+  return{text:u('fbGood')};
+}
+function vSay(){
+  if(!hasAccess())return '<main>'+pendingNotice()+'</main>';
+  var list=CARDS.filter(function(c){return c.tr===V.filter});if(V.card>=list.length)V.card=0;var c=list[V.card],id=c.k;
+  var saved=S.saved.indexOf(id)>-1;
+  var h='<h1 style="font-size:24px">'+u('sayTitle')+'</h1><div class="seg">'+
+   [['he','עברית'],['en','אנגלית'],['il','אנגלית של ישראלים']].map(function(x){return '<button class="chip" data-a="filter" data-id="'+x[0]+'" aria-pressed="'+(V.filter===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+   '<div class="small">'+c.ctx+' · כרטיס '+(V.card+1)+' מתוך '+list.length+'</div>'+
+   '<div class="card"><div class="small">במקום להגיד</div><div class="say-bad" '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'>'+esc(g(c.bad))+'</div></div>';
+  if(V.reveal)h+='<div class="say-good"><div class="small" style="color:inherit;opacity:.9">'+u('say')+'</div><b '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'>'+esc(g(c.good))+'</b><span class="status" style="background:rgba(255,255,255,.2);align-self:flex-start">משדר: '+esc(c.tag)+'</span></div>';
+  else h+='<button class="btn primary" data-a="reveal">'+u('reveal')+'</button>';
+  var lang=c.tr==='he'?'he-IL':'en-US',on=V.listening&&V.mode==='card';
+  h+='<div class="row wrap">'+spk(g(c.good),lang,u('readGood'),'card-'+('00'+(CARDS.indexOf(c)+1)).slice(-3)+'-good')+'</div>'+
+   '<div class="card"><div class="row"><span style="color:var(--warm)">'+ic('mic')+'</span><span class="grow"><b>'+u('sayAloud')+'</b><div class="small">'+u('saySub')+'</div></span></div>'+
+   (IOS?'<div class="notice" role="note" style="margin-top:10px">'+u('iosSay')+'</div><label class="small" for="saidin" style="display:block;margin-top:8px">מה אמרת</label><input type="text" id="saidin" value="'+esc(V.said)+'" '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'><button class="btn primary" data-a="check" style="margin-top:10px;width:100%">'+u('check')+'</button>':'<button class="btn '+(on?'dark':'primary')+'" data-a="say" style="margin-top:10px;width:100%">'+(on?u('stopRec'):u('rec'))+'</button>')+
+   (V.said||on?'<div style="margin-top:10px"><div class="small">מה שאמרת</div><div id="said" '+(c.tr!=='he'?'dir="ltr" style="text-align:left"':'')+'>'+esc(V.said)+'</div>'+(V.score!==null&&!on?'<div class="small" style="margin-top:6px">התאמה למשפט: <b>'+V.score+'%</b>'+(V.score>=80?' מצוין.':V.score>=50?u('near'):u('low'))+'</div>':'')+'</div>':'')+'</div>'+
+   (V.msg?'<div class="notice" role="status">'+V.msg+'</div>':'')+
+   '<div class="row"><button class="btn grow" data-a="save">'+(saved?'נשמר לחזרה':u('saveCard'))+'</button><button class="btn dark grow" data-a="nextcard">הבא</button></div>';
+  return '<main>'+h+'</main>';
+}
+function vMe(){
+  var acc=hasAccess(),t=today();
+  var label=S.role==='owner'?'בעלים · גישה קבועה':S.purchased?'מנוי פעיל':acc?u('roleBeta'):'ממתין לרכישה';
+  var h='<div class="top"><h1 style="font-size:24px">החשבון שלי</h1><button class="themebtn" data-a="theme">מצב כהה/בהיר</button></div>'+
+   '<div class="card"><div class="row"><span class="grow"><b>סטטוס</b></span><span class="status '+(acc?'s-ok':'s-wait')+'">'+label+'</span></div>'+
+   (S.role!=='owner'&&!S.purchased?'<div class="small" style="margin-top:6px">סיום תקופת הבדיקה: '+S.betaEnd+(S.extendedUntil?' · הוארך עד '+S.extendedUntil:'')+'</div>':'')+'</div>';
+  if(!acc)h+='<div class="notice"><b>תקופת הבדיקה הסתיימה</b><div style="margin-top:4px">החשבון וההתקדמות שלך שמורים. אחרי הרכישה הכול חוזר מיד, בדיוק איפה שעצרת.</div></div>';
+  if(S.role!=='owner'&&!S.purchased&&(S.paySwitch!=='off'||!acc)){
+    h+='<h2 style="font-size:18px">'+u('choosePlan')+'</h2><div>';
+    PLANS.forEach(function(p){h+='<button class="plan" data-a="plan" data-id="'+p.id+'" aria-pressed="'+(V.plan===p.id)+'"><span class="grow"><b style="font-size:17px">'+p.name+'</b><div class="small">'+p.per+' ₪ לחודש</div></span><b>'+p.price+' ₪</b></button>'});
+    h+='</div><div class="small">אמצעי תשלום</div><div class="seg" style="flex-wrap:wrap">'+[['bit','ביט'],['card','כרטיס אשראי'],['apple','Apple Pay'],['google','Google Pay']].map(function(x){return '<button class="chip" data-a="method" data-id="'+x[0]+'" aria-pressed="'+(V.method===x[0])+'">'+x[1]+(x[0]==='bit'?' · מומלץ':'')+'</button>'}).join('')+'</div><div class="small">המחיר כולל מע"מ. עמלת הסליקה חלה על הרוכש ותוצג בקופה לפני התשלום (כפוף לבדיקה משפטית).</div><button class="btn primary" data-a="buy">'+u('payGo')+({bit:'ביט',card:'כרטיס אשראי',apple:'Apple Pay',google:'Google Pay'}[V.method])+'</button>';
+    if(V.notice)h+='<div class="notice" role="status">'+V.notice+'</div>';
+  }
+  h+='<div class="card" style="border-style:dashed"><b>לוח בדיקה</b><div class="small">רק בהדמיה: מדמה את מתג התשלום ואת פעולות הבעלים בדשבורד.</div>'+
+   '<div style="margin-top:10px" class="small">מתג תשלום</div><div class="seg">'+[['off','כבוי'],['testers','בודקים בלבד'],['active','פעיל']].map(function(x){return '<button class="chip" data-a="sw" data-id="'+x[0]+'" aria-pressed="'+(S.paySwitch===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+   '<div style="margin-top:10px" class="small">מגדר (לשון הפנייה)</div><div class="seg">'+[['m','גבר'],['f','אישה']].map(function(x){return '<button class="chip" data-a="gender" data-id="'+x[0]+'" aria-pressed="'+(S.gender===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><div style="margin-top:10px" class="small">תפקיד</div><div class="seg">'+[['beta',u('roleBeta')],['owner','בעלים']].map(function(x){return '<button class="chip" data-a="role" data-id="'+x[0]+'" aria-pressed="'+(S.role===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+   '<div style="margin-top:10px" class="row wrap"><button class="btn grow" data-a="expire">'+u('expire')+'</button></div>'+
+   '<div style="margin-top:10px"><label class="small" for="ext">הארכת תוקף עד תאריך</label><div class="row"><input type="date" id="ext" min="'+t+'" value="'+(S.extendedUntil||addDays(30))+'" class="grow"><button class="btn primary" data-a="extend">'+u('extend')+'</button></div></div>'+
+   '<div style="margin-top:10px"><button class="btn" data-a="reset">איפוס כל הנתונים</button></div></div>';
+  return '<main>'+h+'</main>';
+}
+function tabs(){
+  var T=[['home','בית','home'],['lessons','שיעורים','book'],['say',u('tabSay'),'chat'],['me','אני','user']];
+  return '<nav class="tabs" aria-label="ניווט ראשי"><div class="in">'+T.map(function(x){return '<button class="tab" data-a="tab" data-id="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'>'+ic(x[2])+x[1]+'</button>'}).join('')+'</div></nav>';
+}
+function render(){
+  var app=document.getElementById('app'),ae=document.activeElement,keep=ae&&ae.id==='ans'?ae.value:null;
+  var body=!S.quizDone?vQuiz():V.tab==='home'?vHome():V.tab==='lessons'?vLessons():V.tab==='say'?vSay():vMe();
+  app.innerHTML=body+(S.quizDone?tabs():'');
+  if(IOS){var mb=document.querySelectorAll('[data-a="dict"]');for(var q=0;q<mb.length;q++)mb[q].remove()}
+  var a=document.getElementById('ans');if(a&&keep!==null){a.focus();}
+  document.title='צעד קדימה';
+}
+
+/* ---------- actions ---------- */
+function streakDone(){var t=today();if(S.last===t)return;S.streak=(S.last===addDays(-1))?S.streak+1:1;S.last=t}
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-a]');if(!b)return;
+  var a=b.dataset.a,id=b.dataset.id,i=+b.dataset.i;
+  if(a==='pick'){S.quiz[V.qi]=i;if(V.qi===0)S.gender=i===0?'m':'f';if(V.qi===1)S.journey=['ch','th','br','tr','ld'][i];V.qi++;if(V.qi>=4){S.quizDone=true;V.qi=0}save()}
+  else if(a==='tab'){stopVoice();V.said='';V.score=null;V.msg='';V.tab=id;V.lesson=null;V.notice=''}
+  else if(a==='journey'){S.journey=id;save()}
+  else if(a==='start'){V.tab='lessons';V.lesson={j:S.journey,i:i};V.step=0;V.answer='';V.feedback=null;if(!hasAccess()){V.lesson=null}}
+  else if(a==='open'){V.lesson={j:b.dataset.j,i:i};V.step=0;V.answer='';V.feedback=null}
+  else if(a==='back'){V.lesson=null}
+  else if(a==='next'){
+    stopVoice();V.msg='';var ta=document.getElementById('ans');if(ta)V.answer=ta.value;
+    if(V.step===1)V.feedback=null;
+    if(V.step===3){S.done[V.lesson.j+V.lesson.i]=true;streakDone();save();V.lesson=null;V.tab='home'}else V.step++;
+  }
+  else if(a==='filter'){stopVoice();V.filter=id;V.card=0;V.reveal=false;V.said='';V.score=null;V.msg=''}
+  else if(a==='reveal'){V.reveal=true}
+  else if(a==='nextcard'){stopVoice();V.card++;V.reveal=false;V.said='';V.score=null;V.msg=''}
+  else if(a==='save'){var l=CARDS.filter(function(c){return c.tr===V.filter})[V.card];var k=S.saved.indexOf(l.k);if(k>-1)S.saved.splice(k,1);else S.saved.push(l.k);save()}
+  else if(a==='plan'){V.plan=id}
+  else if(a==='gender'){stopVoice();S.gender=id;save()}
+  else if(a==='check'){var lc=CARDS.filter(function(c){return c.tr===V.filter})[V.card],iv=document.getElementById('saidin');V.said=iv?iv.value.trim():'';V.score=V.said?similarity(g(lc.good),V.said):null}
+  else if(a==='speak'){V.msg='';if(!playClip(b.dataset.aid,b.dataset.t,b.dataset.l))speak(b.dataset.t,b.dataset.l)}
+  else if(a==='dict'){if(V.listening&&V.mode==='dict'){stopVoice()}else{listen('he-IL','dict','');return}}
+  else if(a==='say'){var ls=CARDS.filter(function(c){return c.tr===V.filter})[V.card];if(V.listening&&V.mode==='card'){stopVoice()}else{listen(ls.tr==='he'?'he-IL':'en-US','card',g(ls.good));return}}
+  else if(a==='method'){V.method=id}
+  else if(a==='buy'){V.notice='בהדמיה התשלום לא מחובר. בגרסה האמיתית כאן נפתחת קופה של ספק הסליקה, עם הסכום הסופי כולל עמלה.'}
+  else if(a==='sw'){S.paySwitch=id;save()}
+  else if(a==='role'){S.role=id;save()}
+  else if(a==='expire'){S.betaEnd=addDays(-1);S.extendedUntil='';save()}
+  else if(a==='extend'){var v=document.getElementById('ext').value;if(v&&v>=today()){S.extendedUntil=v;save()}}
+  else if(a==='theme'){var r=document.documentElement,d=r.getAttribute('data-theme');var dark=d?d==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;r.setAttribute('data-theme',dark?'light':'dark')}
+  else if(a==='reset'){try{localStorage.removeItem(KEY)}catch(x){}location.reload();return}
+  render();
+});
+render();
+</script>
