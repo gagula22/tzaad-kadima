@@ -203,6 +203,9 @@ function load(){try{var r=localStorage.getItem(KEY);return r?JSON.parse(r):null}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 var V={tab:'home',lesson:null,step:0,answer:'',feedback:null,card:0,filter:'he',reveal:false,qi:0,plan:'h',method:'bit',notice:'',msg:'',listening:false,mode:'',said:'',score:null,sayTab:'ex',sx:0,sxl:'he',coach:null};
 var seqTok=0;
+var NAV=[];
+function navSnap(){return JSON.stringify({tab:V.tab,lesson:V.lesson,step:V.step,sayTab:V.sayTab,sx:V.sx,sxl:V.sxl,filter:V.filter,card:V.card,reveal:V.reveal,coach:V.coach,said:V.said})}
+var navPre='';
 
 function hasAccess(){
   if(S.role==='owner'||S.purchased)return true;
@@ -567,7 +570,7 @@ function vSayEx(){
 }
 function vCoach(){
   var C=V.coach,s=C.sit,r=C.r,N=s.bad.length,lang=s.lang,rtl=lang==='he-IL'?'':'dir="ltr" style="text-align:left"';
-  var h='<button class="btn" data-a="coachback" style="min-height:40px;margin-bottom:10px">→ חזרה</button><h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
+  var h='<h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
   if(C.ph==='done'){
     var avg=C.scores.length?Math.round(C.scores.reduce(function(a,b){return a+b},0)/C.scores.length):0;
     h+='<div class="card"><b>'+esc(g(COACH.done))+'</b><p style="margin:8px 0 0">התאמה ממוצעת לדרך החזקה: <b>'+avg+'%</b></p><div class="small" style="margin-top:6px">המדד מושווה לניסוחים המוצעים, ולכן ניסוח אחר שנשמע טוב עשוי לקבל ציון נמוך יותר.</div></div>'+
@@ -649,6 +652,7 @@ function tabs(){
 function render(){
   var app=document.getElementById('app'),ae=document.activeElement,keep=ae&&ae.id==='ans'?ae.value:null;
   var body=!S.quizDone?vQuiz():V.tab==='home'?vHome():V.tab==='lessons'?vLessons():V.tab==='say'?vSay():vMe();
+  if(S.quizDone&&NAV.length){var bb='<button class="btn" data-a="goback" style="align-self:flex-start;min-height:40px">→ חזרה</button>';body=/^<main[^>]*>/.test(body)?body.replace(/^(<main[^>]*>)/,'$1'+bb):bb+body}
   app.innerHTML=body+(S.quizDone?tabs():'');
   if(IOS){var mb=document.querySelectorAll('[data-a="dict"]');for(var q=0;q<mb.length;q++)mb[q].remove()}
   var a=document.getElementById('ans');if(a&&keep!==null){a.focus();}
@@ -657,6 +661,7 @@ function render(){
 
 /* ---------- actions ---------- */
 function streakDone(){var t=today();if(S.last===t)return;S.streak=(S.last===addDays(-1))?S.streak+1:1;S.last=t}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(b&&b.dataset.a!=='goback')navPre=navSnap();else navPre=''},true);
 document.addEventListener('click',function(e){
   var b=e.target.closest('[data-a]');if(!b)return;
   var a=b.dataset.a,id=b.dataset.id,i=+b.dataset.i;
@@ -675,6 +680,7 @@ document.addEventListener('click',function(e){
   else if(a==='reveal'){V.reveal=true}
   else if(a==='nextcard'){stopVoice();V.card++;V.reveal=false;V.said='';V.score=null;V.msg=''}
   else if(a==='save'){var l=CARDS.filter(function(c){return c.tr===V.filter})[V.card];var k=S.saved.indexOf(l.k);if(k>-1)S.saved.splice(k,1);else S.saved.push(l.k);save()}
+  else if(a==='goback'){stopVoice();var sn=NAV.pop();V.msg='';if(sn){var ob=JSON.parse(sn);for(var kk2 in ob)V[kk2]=ob[kk2]}}
   else if(a==='saytab'){stopVoice();V.coach=null;V.sayTab=id;V.msg='';V.said=''}
   else if(a==='sxpick'){stopVoice();V.sx=i}
   else if(a==='sxlang'){stopVoice();V.sxl=id;V.sx=sxList()[0]||0}
@@ -708,5 +714,6 @@ document.addEventListener('click',function(e){
   else if(a==='reset'){try{localStorage.removeItem(KEY)}catch(x){}location.reload();return}
   render();
 });
+document.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(!b||b.dataset.a==='goback'||!navPre)return;if(navSnap()!==navPre){NAV.push(navPre);if(NAV.length>60)NAV.shift();render()}});
 render();
 </script>
