@@ -606,8 +606,14 @@ function vSayEx(){
   var h='<div class="seg" style="margin-bottom:10px">'+langs.map(function(x){return '<button class="chip" data-a="sxlang" data-id="'+x[0]+'" aria-pressed="'+(V.sxl===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>';
   h+='<details style="margin-bottom:10px"><summary class="btn" style="width:100%;cursor:pointer">בחירת מצב מתוך '+L.length+'</summary><div class="row wrap" style="gap:6px;margin-top:8px">'+L.map(function(gi,k){return '<button class="chip" data-a="sxpick" data-i="'+gi+'" aria-pressed="'+(gi===n)+'" style="font-size:13px">'+(k+1)+'. '+esc(SAYX[gi].t)+'</button>'}).join('')+'</div></details>';
   h+='<div class="small">'+esc(s.ctx)+' · מצב '+pos+' מתוך '+L.length+'</div><h2 style="margin:4px 0 10px;font-size:20px">'+esc(s.t)+'</h2>';
-  h+='<div class="card"><div class="small"><b>'+(V.sxl==='il'?'הגרסה השגויה':'במקום להגיד')+'</b></div>'+s.bad.map(function(x,i){return lineRow(g(x),'bad',s.bid[i],s.lang)}).join('')+'</div>';
-  h+='<div class="card" style="border-color:var(--accent)"><div class="small"><b>'+(V.sxl==='il'?'הגרסה הנכונה':u('say'))+'</b></div>'+s.good.map(function(x,i){return lineRow(g(x),'good',s.gid[i],s.lang)}).join('')+'</div>';
+  // זוגות: כל משפט שגוי ומיד מתחתיו התשובה הנכונה שלו (bad[i] ↔ good[i])
+  var badLbl=V.sxl==='il'?'הגרסה השגויה':'במקום להגיד',goodLbl=V.sxl==='il'?'הגרסה הנכונה':u('say'),NP=Math.max(s.bad.length,s.good.length);
+  for(var pi=0;pi<NP;pi++){
+    h+='<div class="card" style="border-color:var(--accent)">';
+    if(s.bad[pi]!=null)h+='<div class="small"><b>'+badLbl+'</b></div>'+lineRow(g(s.bad[pi]),'bad',s.bid[pi],s.lang);
+    if(s.good[pi]!=null)h+='<div class="small" style="margin-top:8px"><b>'+goodLbl+'</b></div>'+lineRow(g(s.good[pi]),'good',s.gid[pi],s.lang);
+    h+='</div>';
+  }
   h+='<div class="notice" role="note"><b>הרעיון:</b> '+esc(s.tip)+'</div>';
   h+='<div class="row wrap"><button class="btn" data-a="sxall">'+ic('vol',18)+' הקראת הכול</button><button class="btn" data-a="sxnext">מצב הבא</button></div>';
   h+='<button class="btn primary" data-a="coachstart" data-k="sx" data-i="'+n+'" style="width:100%;margin-top:10px">'+ic('chat')+' שיחה עם מאמן</button>';
@@ -891,7 +897,7 @@ document.addEventListener('click',function(e){
   else if(a==='sxpick'){stopVoice();V.sx=i}
   else if(a==='sxlang'){stopVoice();V.sxl=id;V.sx=sxList()[0]||0}
   else if(a==='sxnext'){stopVoice();var LL=sxList(),pp=LL.indexOf(V.sx);V.sx=LL[(pp+1)%LL.length]}
-  else if(a==='sxall'){var ss=sitFromSx(V.sx),its=[];ss.bad.forEach(function(x,k){its.push({aid:ss.bid[k],t:g(x),l:ss.lang})});ss.good.forEach(function(x,k){its.push({aid:ss.gid[k],t:g(x),l:ss.lang})});playSeq(its)}
+  else if(a==='sxall'){var ss=sitFromSx(V.sx),its=[],nk=Math.max(ss.bad.length,ss.good.length);for(var k=0;k<nk;k++){if(ss.bad[k]!=null)its.push({aid:ss.bid[k],t:g(ss.bad[k]),l:ss.lang});if(ss.good[k]!=null)its.push({aid:ss.gid[k],t:g(ss.good[k]),l:ss.lang})}playSeq(its)}
   else if(a==='coachstart'){var kk=b.dataset.k;V.coach={k:kk,i:i,sit:kk==='sx'?sitFromSx(i):sitFromCard(CARDS[i]),r:0,ph:'ask',scores:[],said:'',fb:null};V.said='';V.msg='';playSeq(coachSeq())}
   else if(a==='coachplay'){playSeq(coachSeq())}
   else if(a==='coachrec'){var cs=V.coach.sit;if(V.listening&&V.mode==='coach'){stopVoice()}else{listen(cs.lang,'coach',g(cs.good[0]));return}}
