@@ -623,8 +623,8 @@ function vCoach(){
   var C=V.coach,s=C.sit,r=C.r,N=s.bad.length,lang=s.lang,rtl=lang==='he-IL'?'':'dir="ltr" style="text-align:left"';
   var h='<h1 style="font-size:24px">שיחה עם מאמן</h1><div class="small">'+esc(s.ctx)+' · סבב '+(Math.min(r+1,N))+' מתוך '+N+'</div>';
   if(C.ph==='done'){
-    var avg=C.scores.length?Math.round(C.scores.reduce(function(a,b){return a+b},0)/C.scores.length):0;
-    h+='<div class="card"><b>'+esc(g(COACH.done))+'</b><p style="margin:8px 0 0">התאמה ממוצעת לדרך החזקה: <b>'+avg+'%</b></p><div class="small" style="margin-top:6px">המדד מושווה לניסוחים המוצעים, ולכן ניסוח אחר שנשמע טוב עשוי לקבל ציון נמוך יותר.</div></div>'+
+    var sc=C.scores.filter(function(x){return typeof x==='number'}),avg=sc.length?Math.round(sc.reduce(function(a,b){return a+b},0)/sc.length):0;
+    h+='<div class="card"><b>'+esc(g(COACH.done))+'</b>'+(sc.length?'<p style="margin:8px 0 0">התאמה ממוצעת לדרך החזקה: <b>'+avg+'%</b></p>':'<p style="margin:8px 0 0">דילגת על כל הסבבים, ולכן אין ציון.</p>')+'<div class="small" style="margin-top:6px">המדד מושווה לניסוחים המוצעים, ולכן ניסוח אחר שנשמע טוב עשוי לקבל ציון נמוך יותר.</div></div>'+
      '<div class="row wrap"><button class="btn" data-a="coachstart" data-k="'+C.k+'" data-i="'+C.i+'">תרגול נוסף באותו מצב</button><button class="btn primary" data-a="coachmore">מצב הבא</button></div><button class="btn" data-a="coachend" style="width:100%;margin-top:8px">חזרה</button>';
     return h;
   }
@@ -860,7 +860,8 @@ function tabs(){
 function render(){
   var app=document.getElementById('app'),ae=document.activeElement,keep=ae&&ae.id==='ans'?ae.value:null;
   var body=!S.quizDone?vQuiz():V.tab==='home'?vHome():V.tab==='lessons'?vLessons():V.tab==='say'?vSay():vMe();
-  if(S.quizDone&&NAV.length){var bb='<button class="btn" data-a="goback" style="align-self:flex-start;min-height:40px">→ חזרה</button>';body=/^<main[^>]*>/.test(body)?body.replace(/^(<main[^>]*>)/,'$1'+bb):bb+body}
+  var hasBack=S.quizDone&&NAV.length,hasNext=!!(V.coach&&V.coach.ph!=='done');
+  if(hasBack||hasNext){var bb='<div class="row" style="justify-content:space-between">'+(hasBack?'<button class="btn" data-a="goback" style="min-height:40px">→ חזרה</button>':'<span></span>')+(hasNext?'<button class="btn primary" data-a="coachnext" style="min-height:40px">'+(V.coach.r<V.coach.sit.bad.length-1?'הבא':'סיום')+' ←</button>':'')+'</div>';body=/^<main[^>]*>/.test(body)?body.replace(/^(<main[^>]*>)/,'$1'+bb):bb+body}
   app.innerHTML=body+(S.quizDone?tabs():'');
   if(IOS){var mb=document.querySelectorAll('[data-a="dict"]');for(var q=0;q<mb.length;q++)mb[q].remove()}
   var a=document.getElementById('ans');if(a&&keep!==null){a.focus();}
