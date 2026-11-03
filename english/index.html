@@ -99,11 +99,11 @@ function sentences(t){return t.replace(/\s+/g,' ').match(/[^.!?]+[.!?"”]*\s*/g
 /* ---- state/nav ---- */
 const V={tab:'home',sub:null,qi:0,score:0};
 const TABS=[['home','🏠','בית'],['read','📖','קריאה'],['lib','🎓','ספרייה'],['book','📷','הספר שלי'],['song','🎵','שירים'],['w3','📚','אוצר'],['gr','🧠','דקדוק'],['words','🃏','חזרה']];
-function go(tab,sub){stop();$('#popw').innerHTML='';V.tab=tab;V.sub=sub||null;V.qi=0;V.score=0;V.miss=new Set();V.ep=null;V.wq=undefined;V.wqt=null;scrollTo(0,0);render()}
+function go(tab,sub){stop();$('#popw').innerHTML='';V.tab=tab;V.sub=sub||null;V.qi=0;V.score=0;V.miss=new Set();V.wc={};V.ep=null;V.wq=undefined;V.wqt=null;scrollTo(0,0);render()}
 function nav(){$('#nav').innerHTML=TABS.map(t=>`<button class="${V.tab===t[0]?'on':''}" data-go="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('')}
 function hdr(){const h=$('#hd');if(h)h.innerHTML=`<span class="pill">🔥 ${S.streak}</span><span class="pill">⭐ ${S.xp} XP · רמה ${lvl()}</span>`}
 function hd(title,back){return `<div class="top"><div class="row">${back?`<button class="btn g s" data-go="${back[0]}" data-sub="${back[1]||''}">→ חזרה</button>`:''}<span class="logo">${title||'Speak <b>Up</b>'}</span>${HELPTAB[V.tab]?`<button class="btn s g" data-x="songhelp" data-h="${HELPTAB[V.tab]}" title="הסבר">❓</button>`:''}</div><div class="row" id="hd"></div></div>`}
-function render(){tick();nav();const f={home:vHome,read:vRead,lib:vLib,book:vBook,song:vSong,words:vWords,w3:vW3,err:vErr,prof:vProf,gr:vGr}[V.tab];$('#app').innerHTML=f();hdr();after()}
+function render(){tick();nav();const f={hard:vHard,home:vHome,read:vRead,lib:vLib,book:vBook,song:vSong,words:vWords,w3:vW3,err:vErr,prof:vProf,gr:vGr}[V.tab];$('#app').innerHTML=f();hdr();after()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go,b.dataset.sub||null)}});
 const TIPS={demopage:'טעינת דף עבודה לדוגמה כדי לראות איך התרגילים נראים',gl:'פתיחת השיעור',gcont:'להמשך',gall:'הקראת כל הדוגמאות',gmc:'בחירת תשובה',gcheck:'בדיקת התשובה',gskip:'לראות את התשובה',gtile:'הזזת המילה',greset:'סידור מחדש',gnext:'לתרגיל הבא',mc:'בחירת תשובה',rot:'סיבוב התמונה',clrrect:'ביטול סימון החיתוך',runocr:'זיהוי הטקסט בתמונה',engonly:'מחיקת שורות בעברית',w3spk:'השמעת המילה',w3tr:'הצגה או הסתרה של התרגום',w3sv:'שמירה או הסרה מהמילים שלי',w3lv:'סינון לפי רמה',w3lt:'סינון לפי אות',w3more:'עוד מילים',w3all:'שמירת כל 10 המילים עם תרגום',w3hear:'הקראה של כל המילים',play:'הקראת הטקסט',slow:'הקראה איטית',stop:'עצירת ההקראה',spk:'השמעת המילה',sv:'שמירה או הסרה מהמילים שלי',cl:'סגירה',glall:'שמירת כל המילים הקשות',ltr:'תרגום השורה לעברית',spkq:'השמעה',yt:'האזנה לשיר ב-YouTube',lyr:'חיפוש מילות השיר',songsv:'שמירת השורות והתחלת לימוד',chk:'בדיקת התשובה',peek:'הצגת התשובה הנכונה',savepage:'שמירת העמוד',editpage:'עריכת הטקסט',delpage:'מחיקת העמוד',flip:'הצגת התרגום',gr:'סימון אם ידעת',addw:'הוספת המילה',again:'להתחיל מחדש',next:'לשאלה הבאה'};
 function tips(root){(root||document).querySelectorAll('[data-x],[data-go]').forEach(b=>{if(b.title)return;const t=b.dataset.x&&TIPS[b.dataset.x];if(t)b.title=t;else if(b.dataset.go&&b.tagName==='BUTTON')b.title=b.textContent.replace(/\s+/g,' ').trim()||'מעבר'})}
@@ -130,24 +130,39 @@ function quizHTML(qs,en,done){
 function quizLabel(){const t=V.tab,id=CUR.id;
  if(t==='read'){const p=READ.find(x=>x.id===id);return p?{lab:'קריאה: '+p.t,tab:'read',id:p.base||p.id}:{lab:'קריאה',tab:'read'}}
  if(t==='lib'){const p=LIB.find(x=>x.id===id);return {lab:'ספרייה'+(p?': '+p.t:''),tab:'lib',id}}
- if(t==='w3')return {lab:'אוצר מילים',tab:'w3'};if(t==='song')return {lab:'שיר',tab:'song'};if(t==='book')return {lab:'הספר שלי',tab:'book'};return {lab:t||'תרגול',tab:t}}
+ if(t==='hard')return {lab:'חזרה על קשות',tab:'hard'};if(t==='w3')return {lab:'אוצר מילים',tab:'w3'};if(t==='song')return {lab:'שיר',tab:'song'};if(t==='book')return {lab:'הספר שלי',tab:'book'};return {lab:t||'תרגול',tab:t}}
 function logQuiz(){const n=CUR.qs.length,l=quizLabel();S.log=S.log||[];S.log.push({d:today(),lab:l.lab,tab:l.tab,id:l.id||null,n,ok:V.score,miss:[...(V.miss||[])].length});if(S.log.length>300)S.log=S.log.slice(-300)}
 function weekStats(){const lim=new Date(Date.now()-6*864e5).toISOString().slice(0,10),L=(S.log||[]).filter(x=>x.d>=lim),by={};
  L.forEach(x=>{const b=by[x.lab]=by[x.lab]||{lab:x.lab,tab:x.tab,id:x.id,n:0,ok:0,runs:0};b.n+=x.n;b.ok+=x.ok;b.runs++});
  const arr=Object.values(by).map(b=>({...b,pc:b.n?b.ok/b.n:0}));
  return {runs:L.length,strong:arr.filter(b=>b.n>=3&&b.pc>=.8).sort((a,b)=>b.pc-a.pc).slice(0,3),weak:arr.filter(b=>b.n>=3&&b.pc<.6).sort((a,b)=>a.pc-b.pc).slice(0,3),total:arr.reduce((a,b)=>a+b.n,0),ok:arr.reduce((a,b)=>a+b.ok,0)}}
-function weekCard(){const w=weekStats();if(!w.runs)return `<div class="card"><b>📊 השבוע שלך</b><div class="mu">עוד אין תרגולים השבוע. סיימי חידון אחד והסיכום יופיע כאן.</div></div>`;
+function weekCard(){const w=weekStats();if(!w.runs)return `<div class="card"><b>📊 השבוע שלך</b><div class="mu">עוד אין תרגולים השבוע. סיימי חידון אחד והסיכום יופיע כאן.</div>${hardBtn()}</div>`;
  const chip=(b,c)=>`<button class="btn s ${c}" data-go="${b.tab}" data-sub="${b.id||''}">${esc(b.lab)} · ${Math.round(b.pc*100)}%</button>`;
  return `<div class="card"><b>📊 השבוע שלך</b><div class="mu" style="margin:4px 0">${w.runs} תרגולים · ${w.ok} מתוך ${w.total} תשובות נכונות בניסיון ראשון (${Math.round(w.ok/w.total*100)}%)</div>
  ${w.strong.length?`<div style="margin-top:6px">💪 חזק אצלך:</div><div class="row" style="flex-wrap:wrap">${w.strong.map(b=>chip(b,'')).join('')}</div>`:''}
  ${w.weak.length?`<div style="margin-top:6px">🌱 לחיזוק:</div><div class="row" style="flex-wrap:wrap">${w.weak.map(b=>chip(b,'g')).join('')}</div>`:'<div class="mu" style="margin-top:6px">אין נושא שדורש חיזוק מיוחד. כל הכבוד!</div>'}
- <div class="row" style="margin-top:8px"><button class="btn s" data-go="words" data-sub="study">🃏 ${due().length} מילים לחזרה</button></div></div>`}
+ <div class="row" style="margin-top:8px"><button class="btn s" data-go="words" data-sub="study">🃏 ${due().length} מילים לחזרה</button>${hardBtn()}</div></div>`}
+function hardBtn(){const n=(S.hardq||[]).length;return n?`<button class="btn s g" data-go="hard">🔁 קשות (${hardDue().length}/${n})</button>`:''}
 async function saveMissWords(qs,btn){const miss=[...(V.miss||[])];const STOPS=STOP;const cand=[];
  for(const i of miss){const q=qs[i];if(q[4]&&/^[A-Za-z' ]+$/.test(q[4])){const he=(q[3]||'').split(' = ')[1];cand.push([q[4].toLowerCase(),he&&/[\u0590-\u05FF]/.test(he)?he:null]);continue}
   const ev=(q[3]||'').replace(/^המשפט:\s*/,'').replace(/\([^)]*\)/g,'');const ws=[...new Set((ev.match(/[A-Za-z]{5,}/g)||[]).map(x=>x.toLowerCase()).filter(w=>!STOPS.has(w)))].slice(0,2);ws.forEach(w=>cand.push([w,null]))}
  const seen=new Set(),list=cand.filter(([w])=>!seen.has(w)&&seen.add(w)).slice(0,8);btn.disabled=true;btn.textContent='שומרת…';let n=0;
  for(const [w,he] of list){const h=he||await trans(w);if(!S.words[w]){addWord(w,h||'');n++}else{S.words[w].box=0;S.words[w].due=today();save()}}
  btn.textContent=list.length?'✔ '+list.length+' מילים נוספו לכרטיסיות לחזרה':'לא נמצאו מילים לשמירה'}
+const qkey=q=>q[0]+'|'+q[1][q[2]];
+function hardUpdate(q,w){S.hardq=S.hardq||[];const k=qkey(q),i=S.hardq.findIndex(h=>h.k===k);
+ if(w>=2){const lab=quizLabel().lab,t=new Date(Date.now()+864e5).toISOString().slice(0,10);
+  if(i>=0){S.hardq[i].n++;S.hardq[i].ok=0;S.hardq[i].due=t}
+  else{S.hardq.push({k,q:[q[0],q[1].slice(),q[2],q[3]||'',q[4]||''],lab,n:1,ok:0,due:t});if(S.hardq.length>80)S.hardq.shift();
+   if(q[4]&&/^[A-Za-z' ]+$/.test(q[4])){const w0=q[4].toLowerCase(),he=((q[3]||'').split(' = ')[1]||'');(async()=>{const h=/[\u0590-\u05FF]/.test(he)?he:await trans(w0);addWord(w0,h||'');if(S.words[w0]){S.words[w0].box=0;S.words[w0].due=today();save()}})()}}}
+ else if(w===0&&i>=0){S.hardq[i].ok++;S.hardq[i].due=new Date(Date.now()+(S.hardq[i].ok*2)*864e5).toISOString().slice(0,10);if(S.hardq[i].ok>=2)S.hardq.splice(i,1)}
+ save()}
+const hardDue=()=>(S.hardq||[]).filter(h=>h.due<=today());
+function hardQs(){const d=hardDue(),rest=(S.hardq||[]).filter(h=>!d.includes(h));return pickN(d,8).concat(pickN(rest,Math.max(0,8-Math.min(d.length,8)))).slice(0,8).map(h=>{const c=h.q[1][h.q[2]],o=pickN(h.q[1],h.q[1].length);return[h.q[0],o,o.indexOf(c),h.q[3],h.q[4]||undefined]})}
+function vHard(){const n=(S.hardq||[]).length,d=hardDue().length;
+ if(V.sub==='quiz'){if(!V.hq||!V.hq.length)V.hq=hardQs();CUR={qs:V.hq,id:null};return hd('חזרה על קשות',['hard'])+(V.hq.length?quizHTML(V.hq,false,['hard']):'<div class="card">אין שאלות קשות כרגע 🎉</div>')}
+ V.hq=null;
+ return hd('חזרה על קשות',['home'])+`<div class="card"><b>🔁 שאלות ומילים שדרשו כמה ניסיונות</b><p class="mu">שאלה שלא נענתה נכון גם בניסיון השני נכנסת לכאן וחוזרת בימים הבאים. אחרי שתי תשובות נכונות בניסיון ראשון היא יוצאת מהרשימה.</p><div class="mu">${n} ברשימה · ${d} לחזרה היום</div><div class="row" style="margin-top:8px"><button class="btn" data-go="hard" data-sub="quiz" ${n?'':'disabled'}>🔁 תרגול עכשיו</button></div></div>`+(n?`<div class="card"><b>מה ברשימה</b>${S.hardq.slice().reverse().slice(0,20).map(h=>`<div class="line" style="flex-direction:column;align-items:stretch"><div>${esc(h.q[0])}</div><div class="mu">✔ ${esc(h.q[1][h.q[2]])} · ${esc(h.lab)} · ${h.n}×</div></div>`).join('')}</div>`:'')}
 const LVS=['A2','B1','B2'];
 function adviceHTML(){const a=S.ad||{ok:0,bad:0},p=S.prof;if(!p||!p.lv)return '';const i=LVS.indexOf(p.lv);if(i<0)return '';
  if(a.ok>=6&&i<2)return `<div class="fb ok" style="margin-top:10px">🚀 הצלחת הרבה בלי עזרה. רוצה לנסות רמה גבוהה יותר (${LVS[i+1]})?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i+1]}">כן, בואי ננסה</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;
@@ -158,15 +173,15 @@ function summaryHTML(qs,done){const miss=[...(V.miss||[])].sort((a,b)=>a-b),n=qs
 let tries=0;
 document.addEventListener('click',e=>{
  const o=e.target.closest('.opt');if(o&&CUR.qs){const q=CUR.qs[V.qi],i=+o.dataset.i;if(o.classList.contains('no'))return;
-  if(i===q[2]){o.classList.add('ok');document.querySelectorAll('.opt').forEach(x=>x.disabled=true);const first=tries===0;S.ad=S.ad||{ok:0,bad:0};if(first){V.score++;gain(10,1);S.ad.ok++;S.ad.bad=0}else gain(3);save();burst(e);tries=0;
+  if(i===q[2]){o.classList.add('ok');document.querySelectorAll('.opt').forEach(x=>x.disabled=true);const first=tries===0;hardUpdate(q,(V.wc||{})[V.qi]||0);S.ad=S.ad||{ok:0,bad:0};if(first){V.score++;gain(10,1);S.ad.ok++;S.ad.bad=0}else gain(3);save();burst(e);tries=0;
    $('#fb').innerHTML=`<div class="fb ok">✅ ${first?'כל הכבוד!':'יפה, תיקנת!'} ${esc(q[3]||'')}</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}
-  else{o.classList.add('no');o.disabled=true;tries++;V.miss=V.miss||new Set();S.ad=S.ad||{ok:0,bad:0};
+  else{o.classList.add('no');o.disabled=true;tries++;V.wc=V.wc||{};V.wc[V.qi]=(V.wc[V.qi]||0)+1;V.miss=V.miss||new Set();S.ad=S.ad||{ok:0,bad:0};
    if(tries===1){V.miss.add(V.qi);S.ad.ok=0;S.ad.bad++;save();const left=[...document.querySelectorAll('.opt')].filter(x=>!x.classList.contains('no')&&+x.dataset.i!==q[2]);let h='קראי שוב את השאלה לאט ונסי שוב.';if(left.length>=2){const r=left[Math.floor(Math.random()*left.length)];r.classList.add('no');r.disabled=true;h='הוצאתי תשובה אחת שלא נכונה. נסי שוב.'}$('#fb').innerHTML=`<div class="fb no">לא בדיוק, זה חלק מהלמידה 🙂<br>💡 רמז 1: ${h}</div>`}
    else if(tries===2){$('#fb').innerHTML=`<div class="fb no">כמעט! 💡 רמז 2: ${esc(q[3]||'חפשי את הרמז בשאלה עצמה.')}</div>`}
    else{document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.i===q[2])x.classList.add('ok')});tries=0;$('#fb').innerHTML=`<div class="fb ok">התשובה הנכונה מסומנת. ${esc(q[3]||'')}<br>נחזור אליה בסוף 💪</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}}}
  const x=e.target.dataset.x;if(x==='prevq'&&CUR.qs&&V.qi>0){V.qi--;tries=0;render();return}
  if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){if(CUR.id)S.done[CUR.id]=1;logQuiz();save()}render()}
- if(x==='again'){V.qi=0;V.score=0;V.miss=new Set();tries=0;render()}
+ if(x==='again'){V.qi=0;V.score=0;V.miss=new Set();V.wc={};tries=0;render()}
  if(x==='misswords'){saveMissWords(CUR.qs,e.target);return}
  if(x==='lvset'){S.prof.lv=e.target.dataset.v;S.ad={ok:0,bad:0};save();e.target.closest('.fb').innerHTML='✅ עדכנתי את הרמה ל-'+S.prof.lv+'. ההמלצות יתאימו לה.'}
  if(x==='lvkeep'){S.ad={ok:0,bad:0};save();e.target.closest('.fb').remove()}});
@@ -335,7 +350,7 @@ document.addEventListener('click',async e=>{const x=e.target.dataset.x;
 const INT=[0,1,2,4,8,16];
 function vWords(){const all=Object.entries(S.words),d=due();
  if(V.sub==='study'){if(!d.length)return hd('מילים',['words'])+'<div class="card">🎉 אין מילים לחזרה עכשיו. חזרי מחר!</div>';const pool=d.filter(([q])=>!(V.later||[]).includes(q));const [k,v]=(pool.length?pool:d)[0];return hd('חזרה על מילים',['words'])+`<div class="card flash" data-x="flip" data-k="${esc(k)}"><div class="en" style="font-size:34px">${esc(k)}</div><div id="bk" class="mu" style="margin-top:10px">לחצי כדי לראות תרגום · ${d.length} נשארו</div></div><div class="row" id="grade" style="display:none"><button class="btn" data-x="gr" data-k="${esc(k)}" data-v="1">ידעתי ✓</button><button class="btn g" data-x="gr" data-k="${esc(k)}" data-v="0">עוד לא ✗</button></div>`}
- return hd('המילים שלי',['home'])+`<div class="card"><b>${all.length} מילים שמורות · ${d.length} לחזרה היום</b><div class="row" style="margin-top:8px"><button class="btn" data-go="words" data-sub="study" ${d.length?'':'disabled'}>🃏 תרגול עכשיו</button></div></div><div class="card"><b>הוספת מילה</b><div class="row"><input class="en" id="nw" placeholder="word" style="flex:1"><input id="nh" placeholder="תרגום" style="flex:1"><button class="btn s" data-x="addw">➕</button></div></div><div>${all.map(([k,v])=>`<span class="chip">${esc(k)}<span class="sp">–</span><small>${esc(v.he||'')}</small></span>`).join('')||'<div class="mu">עוד אין מילים. לחצי על מילים בקטעי הקריאה ושמרי אותן.</div>'}</div>`}
+ return hd('המילים שלי',['home'])+`<div class="card"><b>${all.length} מילים שמורות · ${d.length} לחזרה היום</b><div class="row" style="margin-top:8px"><button class="btn" data-go="words" data-sub="study" ${d.length?'':'disabled'}>🃏 תרגול עכשיו</button>${hardBtn()}</div></div><div class="card"><b>הוספת מילה</b><div class="row"><input class="en" id="nw" placeholder="word" style="flex:1"><input id="nh" placeholder="תרגום" style="flex:1"><button class="btn s" data-x="addw">➕</button></div></div><div>${all.map(([k,v])=>`<span class="chip">${esc(k)}<span class="sp">–</span><small>${esc(v.he||'')}</small></span>`).join('')||'<div class="mu">עוד אין מילים. לחצי על מילים בקטעי הקריאה ושמרי אותן.</div>'}</div>`}
 document.addEventListener('click',e=>{const x=e.target.closest('[data-x]'),k=x&&x.dataset.x;if(!k)return;const d=x.dataset;
  if(k==='flip'){const w=S.words[d.k];$('#bk').innerHTML='<span style="font-size:26px;color:#fff">'+esc(w.he||'(אין תרגום שמור)')+'</span>';$('#grade').style.display='flex';say(d.k,.5)}
  if(k==='gr'){const w=S.words[d.k];V.later=V.later||[];if(d.v==='1'){w.box=Math.min(5,w.box+1);w.due=new Date(Date.now()+INT[w.box]*864e5).toISOString().slice(0,10);V.later=V.later.filter(z=>z!==d.k);gain(3,1);burst(e)}else{w.box=0;w.due=today();V.later.push(d.k)}save();render()}
@@ -361,7 +376,7 @@ async function buildTQ(){const pool=pickN(DS().filter(x=>x.l===curLv()&&/^[a-z]+
 function vW3(){
  const chips=W3S.src==='ox'?['A1','A2','B1','B2'].map(v=>[v,v]):['P1','1a','1b','2a','2b','LA','LB','LC','LD'].map(v=>[v,LBL[v]]);
  const srcBar=`<div class="row" style="margin:6px 0"><button class="btn s ${W3S.src==='ox'?'':'g'}" data-x="w3src" data-v="ox">Oxford 3000</button><button class="btn s ${W3S.src==='moe'?'':'g'}" data-x="w3src" data-v="moe">משרד החינוך (בגרות)</button></div>`;
- if(V.sub&&V.sub.startsWith('quiz')){const t=V.sub.slice(5);if(V.wq===undefined||V.wqt!==t){V.wqt=t;V.wq=null;V.qi=0;V.score=0;V.miss=new Set();if(t==='t'){buildTQ().then(q=>{V.wq=q||buildQ('m');render()});}else V.wq=buildQ(t)}
+ if(V.sub&&V.sub.startsWith('quiz')){const t=V.sub.slice(5);if(V.wq===undefined||V.wqt!==t){V.wqt=t;V.wq=null;V.qi=0;V.score=0;V.miss=new Set();V.wc={};if(t==='t'){buildTQ().then(q=>{V.wq=q||buildQ('m');render()});}else V.wq=buildQ(t)}
   if(V.wq===null)return hd('חידון',['w3'])+'<div class="card">מכינה שאלות עם תרגום… ⏳</div>';
   CUR={qs:V.wq,id:null};return hd('חידון',['w3'])+(V.wq.length?quizHTML(V.wq,t!=='t',['w3']):'<div class="card">אין מספיק מילים ברשימה הזאת לחידון כזה. נסי רשימה אחרת או חידון אחר.</div>')}
  if(V.sub==='daily'){const l=daily();return hd('10 מילים להיום',['w3'])+`<div class="mu">${W3S.src==='ox'?'Oxford 3000':'משרד החינוך'} · ${LBL[curLv()]||curLv()}. שמעי, קראי את התרגום, ושמרי את כולן לכרטיסיות החזרה.</div>`+l.map(w3row).join('')+`<div class="row" style="margin-top:10px"><button class="btn" data-x="w3all">⭐ שמרי את כולן עם תרגום</button><button class="btn g" data-x="w3hear">🔊 הקראה של כולן</button></div><div id="w3msg" class="mu"></div>`}
