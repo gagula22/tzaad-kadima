@@ -99,7 +99,7 @@ function sentences(t){return t.replace(/\s+/g,' ').match(/[^.!?]+[.!?"”]*\s*/g
 /* ---- state/nav ---- */
 const V={tab:'home',sub:null,qi:0,score:0};
 const TABS=[['home','🏠','בית'],['read','📖','קריאה'],['lib','🎓','ספרייה'],['book','📷','הספר שלי'],['song','🎵','שירים'],['w3','📚','אוצר'],['gr','🧠','דקדוק'],['words','🃏','חזרה']];
-function go(tab,sub){stop();$('#popw').innerHTML='';V.tab=tab;V.sub=sub||null;V.qi=0;V.score=0;V.ep=null;V.wq=undefined;V.wqt=null;scrollTo(0,0);render()}
+function go(tab,sub){stop();$('#popw').innerHTML='';V.tab=tab;V.sub=sub||null;V.qi=0;V.score=0;V.miss=new Set();V.ep=null;V.wq=undefined;V.wqt=null;scrollTo(0,0);render()}
 function nav(){$('#nav').innerHTML=TABS.map(t=>`<button class="${V.tab===t[0]?'on':''}" data-go="${t[0]}"><span>${t[1]}</span>${t[2]}</button>`).join('')}
 function hdr(){const h=$('#hd');if(h)h.innerHTML=`<span class="pill">🔥 ${S.streak}</span><span class="pill">⭐ ${S.xp} XP · רמה ${lvl()}</span>`}
 function hd(title,back){return `<div class="top"><div class="row">${back?`<button class="btn g s" data-go="${back[0]}" data-sub="${back[1]||''}">→ חזרה</button>`:''}<span class="logo">${title||'Speak <b>Up</b>'}</span>${HELPTAB[V.tab]?`<button class="btn s g" data-x="songhelp" data-h="${HELPTAB[V.tab]}" title="הסבר">❓</button>`:''}</div><div class="row" id="hd"></div></div>`}
@@ -124,17 +124,29 @@ function vHome(){const goal=3,p=Math.min(1,S.today/goal);
  <div class="card mu">💡 הקשיבי למשפטים, לחצי על כל מילה כדי לראות תרגום ולשמור אותה, ובסוף חזרי על המילים. מעט כל יום עדיף על הרבה פעם בשבוע.</div>`}
 /* ---- quiz ---- */
 function quizHTML(qs,en,done){
- const q=qs[V.qi];if(!q)return `<div class="card"><h2>סיימת! 🎉</h2><p>ענית נכון על ${V.score} מתוך ${qs.length} בניסיון הראשון.</p><div class="row"><button class="btn" data-x="again">שוב</button><button class="btn g" data-go="${done[0]}" data-sub="${done[1]||''}">חזרה</button></div></div>`;
+ const q=qs[V.qi];if(!q)return summaryHTML(qs,done);
  return `<div class="card"><div class="mu">שאלה ${V.qi+1} מתוך ${qs.length}</div><div class="bar" style="margin:6px 0"><i style="width:${V.qi/qs.length*100}%"></i></div><h3 ${en?'class="en"':''}>${esc(q[0])}</h3>${q[4]?`<button class="btn s" data-x="qspk" data-t="${esc(q[4])}">🔊 השמעה</button>`:''}<div id="opts">${q[1].map((o,i)=>`<button class="opt ${en?'enOpt':''}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div>${V.qi>0?`<button class="btn s g" data-x="prevq" style="margin-top:10px">→ שאלה קודמת</button>`:''}</div>`}
+const LVS=['A2','B1','B2'];
+function adviceHTML(){const a=S.ad||{ok:0,bad:0},p=S.prof;if(!p||!p.lv)return '';const i=LVS.indexOf(p.lv);if(i<0)return '';
+ if(a.ok>=6&&i<2)return `<div class="fb ok" style="margin-top:10px">🚀 הצלחת הרבה בלי עזרה. רוצה לנסות רמה גבוהה יותר (${LVS[i+1]})?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i+1]}">כן, בואי ננסה</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;
+ if(a.bad>=4&&i>0)return `<div class="fb ok" style="margin-top:10px">🌱 אפשר לתרגל עוד קצת ברמה נוחה יותר (${LVS[i-1]}) ולחזור לכאן אחר כך. מתאים לך?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i-1]}">כן, נוח לי</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;return ''}
+function summaryHTML(qs,done){const miss=[...(V.miss||[])].sort((a,b)=>a-b),n=qs.length,ok=V.score;
+ const msg=ok===n?'מושלם! כל התשובות בניסיון הראשון 🌟':ok>=n*.6?'יפה מאוד, את בכיוון הנכון 👏':'התחלה טובה. כל תרגול משפר 💪';
+ return `<div class="card"><h2>סיימת! 🎉</h2><p>${msg}</p><p class="mu">${ok} מתוך ${n} בניסיון הראשון${miss.length?` · ${miss.length} לחיזוק`:''}</p>${miss.length?`<div class="mu" style="margin:6px 0 2px"><b>💪 לחיזוק, כדאי לחזור על:</b></div>${miss.map(i=>`<div class="line" style="flex-direction:column;align-items:stretch"><div class="${'en'}" style="direction:auto">${esc(qs[i][0])}</div><div class="mu">✔ ${esc(qs[i][1][qs[i][2]])}${qs[i][3]?' · '+esc(qs[i][3]):''}</div></div>`).join('')}`:''}${adviceHTML()}<div class="row" style="margin-top:12px"><button class="btn" data-x="again">${miss.length?'עוד סיבוב ←':'שוב'}</button><button class="btn g" data-go="${done[0]}" data-sub="${done[1]||''}">חזרה</button></div></div>`}
 let tries=0;
 document.addEventListener('click',e=>{
  const o=e.target.closest('.opt');if(o&&CUR.qs){const q=CUR.qs[V.qi],i=+o.dataset.i;if(o.classList.contains('no'))return;
-  if(i===q[2]){o.classList.add('ok');document.querySelectorAll('.opt').forEach(x=>x.disabled=true);if(tries===0){V.score++;gain(10,1)}else gain(3);burst(e);tries=0;
-   $('#fb').innerHTML=`<div class="fb ok">✅ ${tries===0?'כל הכבוד!':'יפה, תיקנת!'} ${esc(q[3]||'')}</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}
-  else{o.classList.add('no');tries++;$('#fb').innerHTML=`<div class="fb no">לא בדיוק. נסי שוב, את יכולה! ${tries>=2?'<br>💡 '+esc(q[3]||''):''}</div>`}}
+  if(i===q[2]){o.classList.add('ok');document.querySelectorAll('.opt').forEach(x=>x.disabled=true);const first=tries===0;S.ad=S.ad||{ok:0,bad:0};if(first){V.score++;gain(10,1);S.ad.ok++;S.ad.bad=0}else gain(3);save();burst(e);tries=0;
+   $('#fb').innerHTML=`<div class="fb ok">✅ ${first?'כל הכבוד!':'יפה, תיקנת!'} ${esc(q[3]||'')}</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}
+  else{o.classList.add('no');o.disabled=true;tries++;V.miss=V.miss||new Set();S.ad=S.ad||{ok:0,bad:0};
+   if(tries===1){V.miss.add(V.qi);S.ad.ok=0;S.ad.bad++;save();const left=[...document.querySelectorAll('.opt')].filter(x=>!x.classList.contains('no')&&+x.dataset.i!==q[2]);let h='קראי שוב את השאלה לאט ונסי שוב.';if(left.length>=2){const r=left[Math.floor(Math.random()*left.length)];r.classList.add('no');r.disabled=true;h='הוצאתי תשובה אחת שלא נכונה. נסי שוב.'}$('#fb').innerHTML=`<div class="fb no">לא בדיוק, זה חלק מהלמידה 🙂<br>💡 רמז 1: ${h}</div>`}
+   else if(tries===2){$('#fb').innerHTML=`<div class="fb no">כמעט! 💡 רמז 2: ${esc(q[3]||'חפשי את הרמז בשאלה עצמה.')}</div>`}
+   else{document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.i===q[2])x.classList.add('ok')});tries=0;$('#fb').innerHTML=`<div class="fb ok">התשובה הנכונה מסומנת. ${esc(q[3]||'')}<br>נחזור אליה בסוף 💪</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}}}
  const x=e.target.dataset.x;if(x==='prevq'&&CUR.qs&&V.qi>0){V.qi--;tries=0;render();return}
  if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){S.done[CUR.id]=1;save()}render()}
- if(x==='again'){V.qi=0;V.score=0;tries=0;render()}});
+ if(x==='again'){V.qi=0;V.score=0;V.miss=new Set();tries=0;render()}
+ if(x==='lvset'){S.prof.lv=e.target.dataset.v;S.ad={ok:0,bad:0};save();e.target.closest('.fb').innerHTML='✅ עדכנתי את הרמה ל-'+S.prof.lv+'. ההמלצות יתאימו לה.'}
+ if(x==='lvkeep'){S.ad={ok:0,bad:0};save();e.target.closest('.fb').remove()}});
 let CUR={};
 /* ---- reading ---- */
 function readerBlock(p,isPoem){GL=p.gl||{};
@@ -326,7 +338,7 @@ async function buildTQ(){const pool=pickN(DS().filter(x=>x.l===curLv()&&/^[a-z]+
 function vW3(){
  const chips=W3S.src==='ox'?['A1','A2','B1','B2'].map(v=>[v,v]):['P1','1a','1b','2a','2b','LA','LB','LC','LD'].map(v=>[v,LBL[v]]);
  const srcBar=`<div class="row" style="margin:6px 0"><button class="btn s ${W3S.src==='ox'?'':'g'}" data-x="w3src" data-v="ox">Oxford 3000</button><button class="btn s ${W3S.src==='moe'?'':'g'}" data-x="w3src" data-v="moe">משרד החינוך (בגרות)</button></div>`;
- if(V.sub&&V.sub.startsWith('quiz')){const t=V.sub.slice(5);if(V.wq===undefined||V.wqt!==t){V.wqt=t;V.wq=null;V.qi=0;V.score=0;if(t==='t'){buildTQ().then(q=>{V.wq=q||buildQ('m');render()});}else V.wq=buildQ(t)}
+ if(V.sub&&V.sub.startsWith('quiz')){const t=V.sub.slice(5);if(V.wq===undefined||V.wqt!==t){V.wqt=t;V.wq=null;V.qi=0;V.score=0;V.miss=new Set();if(t==='t'){buildTQ().then(q=>{V.wq=q||buildQ('m');render()});}else V.wq=buildQ(t)}
   if(V.wq===null)return hd('חידון',['w3'])+'<div class="card">מכינה שאלות עם תרגום… ⏳</div>';
   CUR={qs:V.wq,id:null};return hd('חידון',['w3'])+(V.wq.length?quizHTML(V.wq,t!=='t',['w3']):'<div class="card">אין מספיק מילים ברשימה הזאת לחידון כזה. נסי רשימה אחרת או חידון אחר.</div>')}
  if(V.sub==='daily'){const l=daily();return hd('10 מילים להיום',['w3'])+`<div class="mu">${W3S.src==='ox'?'Oxford 3000':'משרד החינוך'} · ${LBL[curLv()]||curLv()}. שמעי, קראי את התרגום, ושמרי את כולן לכרטיסיות החזרה.</div>`+l.map(w3row).join('')+`<div class="row" style="margin-top:10px"><button class="btn" data-x="w3all">⭐ שמרי את כולן עם תרגום</button><button class="btn g" data-x="w3hear">🔊 הקראה של כולן</button></div><div id="w3msg" class="mu"></div>`}
