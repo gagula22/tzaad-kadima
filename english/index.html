@@ -79,12 +79,12 @@ async function trans(w){const k=w.toLowerCase();if(S.tr[k])return S.tr[k];
 let GL={};
 function showWord(w,e){w=w.replace(/^[^A-Za-z]+|[^A-Za-z']+$/g,'');if(!w)return;const g=GL[w.toLowerCase()];
  const el=document.createElement('div');el.className='pop';
- el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="big">${esc(w)}</span><span class="row"><button class="btn s g" data-x="spk">🔊</button><button class="btn s" data-x="sv">⭐ שמרי</button><button class="btn s g" data-x="cl">✕</button></span></div><div id="pt" style="margin-top:6px">${g?esc(g):'מתרגם…'}</div>`;
- $('#popw').innerHTML='';$('#popw').appendChild(el);say(w,.7);
+ el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="big">${esc(w)}</span><span class="row"><button class="btn s g" data-x="spk">🔊</button><button class="btn s ${S.words[w.toLowerCase()]?'g':''}" data-x="sv">${S.words[w.toLowerCase()]?'✔ שמורה (לחצי להסרה)':'⭐ שמרי'}</button><button class="btn s g" data-x="cl">✕</button></span></div><div id="pt" style="margin-top:6px">${g?esc(g):'מתרגם…'}</div>`;
+ $('#popw').innerHTML='';$('#popw').appendChild(el);tips(el);say(w,.5);
  let he=g||'';
  const done=t=>{he=t||'';el.querySelector('#pt').innerHTML=t?esc(t):`לא הצלחתי לתרגם כרגע. <a target="_blank" href="https://translate.google.com/?sl=en&tl=iw&text=${encodeURIComponent(w)}">פתחי בגוגל תרגום</a>`};
  if(g)done(g);else trans(w).then(done);
- el.onclick=ev=>{const x=ev.target.dataset.x;if(x==='cl')$('#popw').innerHTML='';if(x==='spk')say(w,.7);if(x==='sv'){addWord(w,he);ev.target.textContent='✔ נשמר';burst(ev,'⭐')}}}
+ el.onclick=ev=>{const x=ev.target.dataset.x;if(x==='cl')$('#popw').innerHTML='';if(x==='spk')say(w,.5);if(x==='sv'){const kk=w.toLowerCase();if(S.words[kk]){if(confirm('להסיר את "'+w+'" מהמילים שלי?')){delete S.words[kk];save();ev.target.textContent='⭐ שמרי';ev.target.classList.remove('g')}}else{addWord(w,he);ev.target.textContent='✔ שמורה (לחצי להסרה)';ev.target.classList.add('g');burst(ev,'⭐')}}}}
 function addWord(w,he){const k=w.toLowerCase();if(!S.words[k])S.words[k]={he:he||'',box:0,due:today()};else if(he)S.words[k].he=he;save()}
 document.addEventListener('click',e=>{const w=e.target.closest('.w');if(w){document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'));w.classList.add('sel');showWord(w.textContent,e)}});
 /* ---- render helpers ---- */
@@ -99,7 +99,9 @@ function hdr(){const h=$('#hd');if(h)h.innerHTML=`<span class="pill">🔥 ${S.st
 function hd(title,back){return `<div class="top"><div class="row">${back?`<button class="btn g s" data-go="${back[0]}" data-sub="${back[1]||''}">→ חזרה</button>`:''}<span class="logo">${title||'Speak <b>Up</b>'}</span></div><div class="row" id="hd"></div></div>`}
 function render(){tick();nav();const f={home:vHome,read:vRead,lib:vLib,book:vBook,song:vSong,words:vWords,w3:vW3}[V.tab];$('#app').innerHTML=f();hdr();after()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go,b.dataset.sub||null)}});
-function after(){}
+const TIPS={w3spk:'השמעת המילה',w3tr:'הצגה או הסתרה של התרגום',w3sv:'שמירה או הסרה מהמילים שלי',w3lv:'סינון לפי רמה',w3lt:'סינון לפי אות',w3more:'עוד מילים',w3all:'שמירת כל 10 המילים עם תרגום',w3hear:'הקראה של כל המילים',play:'הקראת הטקסט',slow:'הקראה איטית',stop:'עצירת ההקראה',spk:'השמעת המילה',sv:'שמירה או הסרה מהמילים שלי',cl:'סגירה',glall:'שמירת כל המילים הקשות',ltr:'תרגום השורה לעברית',spkq:'השמעה',yt:'האזנה לשיר ב-YouTube',lyr:'חיפוש מילות השיר',songsv:'שמירת השורות והתחלת לימוד',chk:'בדיקת התשובה',peek:'הצגת התשובה הנכונה',savepage:'שמירת העמוד',editpage:'עריכת הטקסט',delpage:'מחיקת העמוד',flip:'הצגת התרגום',gr:'סימון אם ידעת',addw:'הוספת המילה',again:'להתחיל מחדש',next:'לשאלה הבאה'};
+function tips(root){(root||document).querySelectorAll('[data-x],[data-go]').forEach(b=>{if(b.title)return;const t=b.dataset.x&&TIPS[b.dataset.x];if(t)b.title=t;else if(b.dataset.go&&b.tagName==='BUTTON')b.title=b.textContent.replace(/\s+/g,' ').trim()||'מעבר'})}
+function after(){tips()}
 /* ---- home ---- */
 function due(){const t=today();return Object.entries(S.words).filter(([k,v])=>v.due<=t)}
 function vHome(){const goal=3,p=Math.min(1,S.today/goal);
@@ -172,7 +174,7 @@ document.addEventListener('click',e=>{const x=e.target.dataset.x,d=e.target.data
   if(!a){r.innerHTML='<div class="fb no">כתבי תשובה קודם 🙂</div>';return}
   if(kk){const norm=s=>s.toLowerCase().replace(/[^a-z0-9' ]/g,'').replace(/\s+/g,' ').trim();if(norm(a)===norm(kk)){r.innerHTML='<div class="fb ok">✅ נכון!</div>';burst(e);gain(10,1)}else r.innerHTML=`<div class="fb no">לא בדיוק. נסי שוב, או הצצה: <button class="btn s g" data-x="peek" data-i="${d.i}" data-k="${esc(kk)}">הצג תשובה</button></div>`}
   else{r.innerHTML=`<div class="fb ok">התשובה שלך: <span class="en">${esc(a)}</span><br>האם זה נראה לך נכון? <button class="btn s g" data-x="self" data-v="1">✓ כן</button> <button class="btn s g" data-x="self" data-v="0">✗ לא</button></div>`}}
- if(x==='peek'){e.target.outerHTML=`<b class="en">${esc(d.k)}</b>`;say(d.k,.7)}
+ if(x==='peek'){e.target.outerHTML=`<b class="en">${esc(d.k)}</b>`;say(d.k,.5)}
  if(x==='self'){e.target.parentElement.innerHTML=d.v==='1'?'👏 יופי! (+5 XP)':'זה בסדר, ככה לומדים. נסי לקרוא שוב את ההוראה.';if(d.v==='1'){gain(5,1);burst(e)}}
  if(x==='savepage'){const t=($('#bx').value||'').trim();if(!t)return;const title=($('#bt').value||'').trim()||('עמוד '+(S.pages.length+1)),key=$('#bk').value;if(V.draft&&V.draft.id){const p=S.pages.find(q=>q.id===V.draft.id);Object.assign(p,{title,text:t,key,cz:null})}else S.pages.push({id:Date.now(),title,text:t,key});V.draft=null;save();go('book')}
  if(x==='editpage'){const p=S.pages.find(q=>q.id==d.id);V.draft={id:p.id,title:p.title,text:p.text,key:p.key};go('book','edit')}
@@ -198,7 +200,7 @@ function vWords(){const all=Object.entries(S.words),d=due();
  if(V.sub==='study'){if(!d.length)return hd('מילים',['words'])+'<div class="card">🎉 אין מילים לחזרה עכשיו. חזרי מחר!</div>';const pool=d.filter(([q])=>!(V.later||[]).includes(q));const [k,v]=(pool.length?pool:d)[0];return hd('חזרה על מילים',['words'])+`<div class="card flash" data-x="flip" data-k="${esc(k)}"><div class="en" style="font-size:34px">${esc(k)}</div><div id="bk" class="mu" style="margin-top:10px">לחצי כדי לראות תרגום · ${d.length} נשארו</div></div><div class="row" id="grade" style="display:none"><button class="btn" data-x="gr" data-k="${esc(k)}" data-v="1">ידעתי ✓</button><button class="btn g" data-x="gr" data-k="${esc(k)}" data-v="0">עוד לא ✗</button></div>`}
  return hd('המילים שלי',['home'])+`<div class="card"><b>${all.length} מילים שמורות · ${d.length} לחזרה היום</b><div class="row" style="margin-top:8px"><button class="btn" data-go="words" data-sub="study" ${d.length?'':'disabled'}>🃏 תרגול עכשיו</button></div></div><div class="card"><b>הוספת מילה</b><div class="row"><input class="en" id="nw" placeholder="word" style="flex:1"><input id="nh" placeholder="תרגום" style="flex:1"><button class="btn s" data-x="addw">➕</button></div></div><div>${all.map(([k,v])=>`<span class="chip">${esc(k)}<span class="sp">–</span><small>${esc(v.he||'')}</small></span>`).join('')||'<div class="mu">עוד אין מילים. לחצי על מילים בקטעי הקריאה ושמרי אותן.</div>'}</div>`}
 document.addEventListener('click',e=>{const x=e.target.closest('[data-x]'),k=x&&x.dataset.x;if(!k)return;const d=x.dataset;
- if(k==='flip'){const w=S.words[d.k];$('#bk').innerHTML='<span style="font-size:26px;color:#fff">'+esc(w.he||'(אין תרגום שמור)')+'</span>';$('#grade').style.display='flex';say(d.k,.7)}
+ if(k==='flip'){const w=S.words[d.k];$('#bk').innerHTML='<span style="font-size:26px;color:#fff">'+esc(w.he||'(אין תרגום שמור)')+'</span>';$('#grade').style.display='flex';say(d.k,.5)}
  if(k==='gr'){const w=S.words[d.k];V.later=V.later||[];if(d.v==='1'){w.box=Math.min(5,w.box+1);w.due=new Date(Date.now()+INT[w.box]*864e5).toISOString().slice(0,10);V.later=V.later.filter(z=>z!==d.k);gain(3,1);burst(e)}else{w.box=0;w.due=today();V.later.push(d.k)}save();render()}
  if(k==='addw'){const w=$('#nw').value.trim();if(w){addWord(w,$('#nh').value.trim());render()}}});
 
@@ -217,11 +219,12 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-x]')
  if(x==='w3lv'){W3S.lv=b.dataset.v;W3S.n=60;W3S.letter='';W3S.q='';render()}
  if(x==='w3lt'){W3S.letter=W3S.letter===b.dataset.v?'':b.dataset.v;W3S.q='';W3S.n=60;render()}
  if(x==='w3more'){W3S.n+=60;render()}
- if(x==='w3spk')say(k,.7);
- if(x==='w3tr'){const t=tgt();t.textContent='…';const r=await trans(k);t.innerHTML=r?esc(r):'לא הצלחתי לתרגם. <a target="_blank" href="https://translate.google.com/?sl=en&tl=iw&text='+encodeURIComponent(k)+'">גוגל תרגום</a>'}
+ if(x==='w3spk')say(k,.5);
+ if(x==='w3tr'){const t=tgt();if(t.textContent.trim()){t.textContent='';b.title='הצגת התרגום';return}t.textContent='…';const r=await trans(k);t.innerHTML=r?esc(r):'לא הצלחתי לתרגם. <a target="_blank" href="https://translate.google.com/?sl=en&tl=iw&text='+encodeURIComponent(k)+'">גוגל תרגום</a>'}
+ if(x==='w3sv'&&S.words[k]){if(confirm('להסיר את "'+k+'" מהמילים שלי?')){delete S.words[k];save();b.textContent='⭐';b.classList.remove('g');b.title='שמירה למילים שלי'}return}
  if(x==='w3sv'){const r=S.words[k]&&S.words[k].he||await trans(k);addWord(k,r||'');b.textContent='✔';b.classList.add('g');const t=tgt();if(t&&r)t.textContent=r;burst(e,'⭐');gain(2,1)}
  if(x==='w3all'){const m=$('#w3msg');m.textContent='שומרת…';for(const w of daily()){const kk=w.w.split(',')[0].trim().toLowerCase();addWord(kk,S.words[kk]&&S.words[kk].he||await trans(kk)||'')}gain(10,1);burst(e);m.textContent='✔ נשמרו! אפשר לתרגל בלשונית "מילים".';render();V.sub='daily'}
- if(x==='w3hear'){stop();const my=tok;for(const w of daily()){if(my!==tok)return;await say(w.w.split(',')[0],.7);await new Promise(r=>setTimeout(r,500))}}});
+ if(x==='w3hear'){stop();const my=tok;for(const w of daily()){if(my!==tok)return;await say(w.w.split(',')[0],.5);await new Promise(r=>setTimeout(r,500))}}});
 document.addEventListener('input',e=>{if(e.target.id==='w3q'){W3S.q=e.target.value;W3S.letter='';clearTimeout(window._w3t);window._w3t=setTimeout(()=>{const p=e.target.selectionStart;render();const i=$('#w3q');i.focus();i.setSelectionRange(p,p)},250)}});
 render();
 </script></body></html>
