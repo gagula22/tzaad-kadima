@@ -82,14 +82,15 @@ async function trans(w){const k=w.toLowerCase();if(S.tr[k])return S.tr[k];
 let GL={};
 function showWord(w,e){w=w.replace(/^[^A-Za-z]+|[^A-Za-z']+$/g,'');if(!w)return;const g=GL[w.toLowerCase()];
  const el=document.createElement('div');el.className='pop';
- el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="big">${esc(w)}</span><span class="row"><button class="btn s g" data-x="spk">🔊</button><button class="btn s ${S.words[w.toLowerCase()]?'g':''}" data-x="sv">${S.words[w.toLowerCase()]?'✔ שמורה (לחצי להסרה)':'⭐ שמרי'}</button><button class="btn s g" data-x="cl">✕</button></span></div><div id="pt" style="margin-top:6px">${g?esc(g):'מתרגם…'}</div>`;
+ el.innerHTML=`<div class="row" style="justify-content:space-between"><span class="big">${esc(w)}</span><span class="row"><button class="btn s g" data-x="spk">🔊</button><button class="btn s ${S.words[w.toLowerCase()]?'g':''}" data-x="sv">${S.words[w.toLowerCase()]?'✔ שמורה (לחצי להסרה)':'⭐ שמרי'}</button></span></div><button data-x="cl" aria-label="סגירה" title="סגירה" style="position:absolute;top:-14px;left:-6px;width:34px;height:34px;border-radius:50%;border:0;background:#1b1240;color:#fff;font-size:18px;box-shadow:0 2px 8px #0006;cursor:pointer">✕</button><div id="pt" style="margin-top:6px">${g?esc(g):'מתרגם…'}</div>`;
  $('#popw').innerHTML='';$('#popw').appendChild(el);tips(el);say(w,.5);
  let he=g||'';
  const done=t=>{he=t||'';el.querySelector('#pt').innerHTML=t?esc(t):`לא הצלחתי לתרגם כרגע. <a target="_blank" href="https://translate.google.com/?sl=en&tl=iw&text=${encodeURIComponent(w)}">פתחי בגוגל תרגום</a>`};
  if(g)done(g);else trans(w).then(done);
- el.onclick=ev=>{const x=ev.target.dataset.x;if(x==='cl')$('#popw').innerHTML='';if(x==='spk')say(w,.5);if(x==='sv'){const kk=w.toLowerCase();if(S.words[kk]){if(confirm('להסיר את "'+w+'" מהמילים שלי?')){delete S.words[kk];save();ev.target.textContent='⭐ שמרי';ev.target.classList.remove('g')}}else{addWord(w,he);ev.target.textContent='✔ שמורה (לחצי להסרה)';ev.target.classList.add('g');burst(ev,'⭐')}}}}
+ el.onclick=ev=>{const x=ev.target.dataset.x;if(x==='cl'){$('#popw').innerHTML='';document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'))}if(x==='spk')say(w,.5);if(x==='sv'){const kk=w.toLowerCase();if(S.words[kk]){if(confirm('להסיר את "'+w+'" מהמילים שלי?')){delete S.words[kk];save();ev.target.textContent='⭐ שמרי';ev.target.classList.remove('g')}}else{addWord(w,he);ev.target.textContent='✔ שמורה (לחצי להסרה)';ev.target.classList.add('g');burst(ev,'⭐')}}}}
 function addWord(w,he){const k=w.toLowerCase();if(!S.words[k])S.words[k]={he:he||'',box:0,due:today()};else if(he)S.words[k].he=he;save()}
-document.addEventListener('click',e=>{const w=e.target.closest('.w');if(w){document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'));w.classList.add('sel');showWord(w.textContent,e)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#popw').innerHTML='';document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'))}});
+document.addEventListener('click',e=>{if(!e.target.closest('.pop')&&!e.target.closest('.w')&&$('#popw').firstChild){$('#popw').innerHTML='';document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'))}const w=e.target.closest('.w');if(w){document.querySelectorAll('.w.sel').forEach(x=>x.classList.remove('sel'));w.classList.add('sel');showWord(w.textContent,e)}});
 /* ---- render helpers ---- */
 const wordify=t=>esc(t).replace(/[A-Za-z][A-Za-z'’-]*/g,m=>`<span class="w${S.words[m.toLowerCase()]?' k':''}">${m}</span>`);
 function sentences(t){return t.replace(/\s+/g,' ').match(/[^.!?]+[.!?"”]*\s*/g)||[t]}
