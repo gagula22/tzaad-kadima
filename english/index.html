@@ -27,7 +27,7 @@ h1,h2,h3{margin:.3em 0}
 .line.on{background:#ffd16638}.line .n{opacity:.5;min-width:22px;font-size:13px;padding-top:5px}
 .gap{height:10px}
 .opt{display:block;width:100%;text-align:right;background:var(--card2);border:2px solid transparent;border-radius:14px;color:var(--tx);padding:12px 14px;margin:8px 0;font:inherit;cursor:pointer}
-.opt.ok{border-color:var(--ok);background:#4ade8033}.opt.no{border-color:var(--no);background:#ff6b6b33}
+.mc{display:block;width:100%;text-align:left;background:var(--card2);border:2px solid transparent;border-radius:14px;color:var(--tx);padding:10px 14px;margin:6px 0;font:inherit;cursor:pointer;direction:ltr}.mc.sel{border-color:var(--ac2)}.mc.ok{border-color:var(--ok);background:#4ade8033}.mc.no{border-color:var(--no);background:#ff6b6b33}.opt.ok{border-color:var(--ok);background:#4ade8033}.opt.no{border-color:var(--no);background:#ff6b6b33}
 .opt.enOpt{direction:ltr;text-align:left}
 .fb{padding:10px 12px;border-radius:12px;margin:8px 0}.fb.ok{background:#4ade8026}.fb.no{background:#ff6b6b26}
 input,textarea,select{width:100%;background:#0000003a;border:1px solid #ffffff33;border-radius:12px;color:var(--tx);padding:10px 12px;font:inherit}
@@ -101,9 +101,9 @@ function hdr(){const h=$('#hd');if(h)h.innerHTML=`<span class="pill">🔥 ${S.st
 function hd(title,back){return `<div class="top"><div class="row">${back?`<button class="btn g s" data-go="${back[0]}" data-sub="${back[1]||''}">→ חזרה</button>`:''}<span class="logo">${title||'Speak <b>Up</b>'}</span></div><div class="row" id="hd"></div></div>`}
 function render(){tick();nav();const f={home:vHome,read:vRead,lib:vLib,book:vBook,song:vSong,words:vWords,w3:vW3,err:vErr,prof:vProf}[V.tab];$('#app').innerHTML=f();hdr();after()}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go,b.dataset.sub||null)}});
-const TIPS={w3spk:'השמעת המילה',w3tr:'הצגה או הסתרה של התרגום',w3sv:'שמירה או הסרה מהמילים שלי',w3lv:'סינון לפי רמה',w3lt:'סינון לפי אות',w3more:'עוד מילים',w3all:'שמירת כל 10 המילים עם תרגום',w3hear:'הקראה של כל המילים',play:'הקראת הטקסט',slow:'הקראה איטית',stop:'עצירת ההקראה',spk:'השמעת המילה',sv:'שמירה או הסרה מהמילים שלי',cl:'סגירה',glall:'שמירת כל המילים הקשות',ltr:'תרגום השורה לעברית',spkq:'השמעה',yt:'האזנה לשיר ב-YouTube',lyr:'חיפוש מילות השיר',songsv:'שמירת השורות והתחלת לימוד',chk:'בדיקת התשובה',peek:'הצגת התשובה הנכונה',savepage:'שמירת העמוד',editpage:'עריכת הטקסט',delpage:'מחיקת העמוד',flip:'הצגת התרגום',gr:'סימון אם ידעת',addw:'הוספת המילה',again:'להתחיל מחדש',next:'לשאלה הבאה'};
+const TIPS={mc:'בחירת תשובה',rot:'סיבוב התמונה',clrrect:'ביטול סימון החיתוך',runocr:'זיהוי הטקסט בתמונה',engonly:'מחיקת שורות בעברית',w3spk:'השמעת המילה',w3tr:'הצגה או הסתרה של התרגום',w3sv:'שמירה או הסרה מהמילים שלי',w3lv:'סינון לפי רמה',w3lt:'סינון לפי אות',w3more:'עוד מילים',w3all:'שמירת כל 10 המילים עם תרגום',w3hear:'הקראה של כל המילים',play:'הקראת הטקסט',slow:'הקראה איטית',stop:'עצירת ההקראה',spk:'השמעת המילה',sv:'שמירה או הסרה מהמילים שלי',cl:'סגירה',glall:'שמירת כל המילים הקשות',ltr:'תרגום השורה לעברית',spkq:'השמעה',yt:'האזנה לשיר ב-YouTube',lyr:'חיפוש מילות השיר',songsv:'שמירת השורות והתחלת לימוד',chk:'בדיקת התשובה',peek:'הצגת התשובה הנכונה',savepage:'שמירת העמוד',editpage:'עריכת הטקסט',delpage:'מחיקת העמוד',flip:'הצגת התרגום',gr:'סימון אם ידעת',addw:'הוספת המילה',again:'להתחיל מחדש',next:'לשאלה הבאה'};
 function tips(root){(root||document).querySelectorAll('[data-x],[data-go]').forEach(b=>{if(b.title)return;const t=b.dataset.x&&TIPS[b.dataset.x];if(t)b.title=t;else if(b.dataset.go&&b.tagName==='BUTTON')b.title=b.textContent.replace(/\s+/g,' ').trim()||'מעבר'})}
-function after(){tips();const q=CUR.qs&&CUR.qs[V.qi];if(q&&q[4]&&$('#opts')&&/listen|האזנה|שמעי/.test(q[0]))say(q[4],.5)}
+function after(){tips();if(V.tab==='book'&&V.sub==='crop')initCrop();const q=CUR.qs&&CUR.qs[V.qi];if(q&&q[4]&&$('#opts')&&/listen|האזנה|שמעי/.test(q[0]))say(q[4],.5)}
 /* ---- home ---- */
 function due(){const t=today();return Object.entries(S.words).filter(([k,v])=>v.due<=t)}
 function vHome(){const goal=3,p=Math.min(1,S.today/goal);
@@ -156,34 +156,87 @@ function cloze(text,n=6){const sn=text.split(/\n+|(?<=[.!?])\s+/).map(s=>s.trim(
 /* ---- my book ---- */
 const OCRSRC='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 function loadOCR(){return new Promise((ok,no)=>{if(window.Tesseract)return ok();const s=document.createElement('script');s.src=OCRSRC;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+const BK={files:[],i:0,out:[],append:null,rot:0,rect:null,src:null,scale:1};
+const HEB=/[֐-׿]/,LAT=/[A-Za-z]/;
+function bookBody(t){const lines=t.split('\n');let html='',buf=[];const flush=()=>{if(buf.length){html+=`<div class="en">${sentences(buf.join(' ')).map(s=>`<span class="snt" data-t="${esc(s.trim())}">${wordify(s)}</span>`).join(' ')}</div>`;buf=[]}};
+ for(const l of lines){const h=HEB.test(l),la=LAT.test(l);if(!l.trim()){flush();html+='<div class="gap"></div>';continue}
+  if(h&&!la){flush();html+=`<div class="mu" dir="rtl" style="margin:4px 0">${esc(l)}</div>`}else buf.push(l)}
+ flush();return `<div class="card">${html}</div>`}
 function vBook(){
- if(!V.sub)return hd('הספר שלי',['home'])+`<div class="card"><b>📷 צלמי עמוד מהספר</b><p class="mu">האפליקציה תזהה את הטקסט, תקריא אותו, ותהפוך אותו לתרגול. אפשר גם להדביק או להקליד טקסט. הצילום נשאר רק אצלך במכשיר.</p><div class="row"><label class="btn">📸 צילום / תמונה<input type="file" accept="image/*" id="img" style="display:none"></label><button class="btn g" data-go="book" data-sub="new">✍️ להדביק טקסט</button></div><div id="ocr" class="mu"></div></div>`+(S.pages.length?`<h3>העמודים השמורים</h3>`+S.pages.map(p=>`<button class="tile" style="width:100%;margin:6px 0;text-align:right;min-height:0" data-go="book" data-sub="p${p.id}"><b>${esc(p.title)}</b><br><small>${p.text.split(/\s+/).length} מילים</small></button>`).join(''):'<div class="mu">עוד אין עמודים שמורים.</div>');
- if(V.sub==='new'||V.sub==='edit'){const d=V.draft||{title:'',text:'',key:''};return hd('עמוד חדש',['book'])+`<div class="card"><label class="mu">שם (למשל: Unit 3 עמוד 42)</label><input id="bt" value="${esc(d.title)}"><label class="mu">הטקסט (אפשר לתקן טעויות זיהוי)</label><textarea class="en" id="bx" style="min-height:260px">${esc(d.text)}</textarea><label class="mu">מפתח תשובות (לא חובה). למשל: 1. went 2. is 3. have</label><textarea class="en" id="bk" style="min-height:70px">${esc(d.key||'')}</textarea><div class="row" style="margin-top:8px"><button class="btn" data-x="savepage">💾 שמרי</button></div></div>`}
+ if(!V.sub)return hd('הספר שלי',['home'])+`<div class="card"><b>📷 צלמי עמוד מהספר</b><p class="mu">אפשר לבחור כמה תמונות ביחד (למשל כל עמודי הפרק), לחתוך כל תמונה לפני הזיהוי, ולזהות עברית ואנגלית. הצילום נשאר רק אצלך במכשיר.</p><div class="row"><label class="btn">📸 צילום / תמונות<input type="file" accept="image/*" multiple id="img" style="display:none"></label><button class="btn g" data-go="book" data-sub="new">✍️ להדביק טקסט</button></div></div>`+(S.pages.length?`<h3>העמודים השמורים</h3>`+S.pages.map(p=>`<button class="tile" style="width:100%;margin:6px 0;text-align:right;min-height:0" data-go="book" data-sub="p${p.id}"><b>${esc(p.title)}</b><br><small>${p.text.split(/\s+/).length} מילים</small></button>`).join(''):'<div class="mu">עוד אין עמודים שמורים.</div>');
+ if(V.sub==='crop'){const n=BK.files.length;return hd('חיתוך וזיהוי',['book'])+`<div class="card"><div class="mu">תמונה ${BK.i+1} מתוך ${n}. גררי עם האצבע (או העכבר) כדי לסמן רק את אזור הטקסט. אפשר לדלג ולזהות את כל התמונה.</div><div id="cw" style="position:relative;touch-action:none;display:inline-block;margin:8px 0;max-width:100%"><canvas id="cv" style="max-width:100%;border-radius:10px;display:block"></canvas><div id="cr" style="position:absolute;border:2px dashed #ff7ab8;background:#ff7ab833;display:none;pointer-events:none"></div></div><div class="row"><button class="btn s g" data-x="rot">🔄 סיבוב</button><button class="btn s g" data-x="clrrect">✖ בלי חיתוך</button></div><label class="mu" style="margin-top:8px;display:block">שפה בתמונה</label><select id="ol"><option value="eng+heb" ${S.ocrLang!=='eng'?'selected':''}>אנגלית + עברית (איטי יותר)</option><option value="eng" ${S.ocrLang==='eng'?'selected':''}>אנגלית בלבד (מהיר ומדויק יותר)</option></select><div class="row" style="margin-top:10px"><button class="btn" data-x="runocr">🔍 זהי טקסט</button></div><div id="ocr" class="mu" style="margin-top:6px"></div></div>`}
+ if(V.sub==='new'||V.sub==='edit'){const d=V.draft||{title:'',text:'',key:''};return hd(V.sub==='edit'?'עריכת עמוד':'עמוד חדש',['book'])+`<div class="card"><label class="mu">שם (למשל: Unit 3 עמוד 42)</label><input id="bt" value="${esc(d.title)}"><label class="mu">הטקסט (אפשר לתקן טעויות זיהוי)</label><textarea class="en" id="bx" style="min-height:260px" dir="auto">${esc(d.text)}</textarea><div class="row" style="margin-top:6px"><button class="btn s g" data-x="engonly">🧹 השאירי רק שורות באנגלית</button></div><label class="mu" style="display:block;margin-top:8px">מפתח תשובות (לא חובה). למשל: 1. went 2. b 3. play</label><textarea class="en" id="bk" style="min-height:70px">${esc(d.key||'')}</textarea><div class="row" style="margin-top:8px"><button class="btn" data-x="savepage">💾 שמרי</button></div></div>`}
  const p=S.pages.find(x=>'p'+x.id===V.sub.replace(/![a-z]+$/,''));if(!p){V.sub=null;return vBook()}
  const mode=(V.sub.match(/!([a-z]+)$/)||[])[1]||'read';
- GL={};
- let body='';
- if(mode==='read')body=`<div class="card en">${sentences(p.text).map(s=>`<span class="snt" data-t="${esc(s.trim())}">${wordify(s)}</span>`).join(' ')}</div>`+ctl();
- else if(mode==='cloze'){CUR={qs:p.cz||(p.cz=cloze(p.text,8)),id:null};body=CUR.qs.length?quizHTML(CUR.qs,true,['book','p'+p.id]):'<div class="card">אין מספיק טקסט ליצירת תרגיל. הוסיפי עוד טקסט.</div>'}
+ GL={};let body='';
+ if(mode==='read')body=bookBody(p.text)+ctl();
+ else if(mode==='cloze'){const eng=p.text.split('\n').filter(l=>!(HEB.test(l)&&!LAT.test(l))).join('\n');CUR={qs:p.cz||(p.cz=cloze(eng,8)),id:null};body=CUR.qs.length?quizHTML(CUR.qs,true,['book','p'+p.id]):'<div class="card">אין מספיק טקסט ליצירת תרגיל. הוסיפי עוד טקסט.</div>'}
  else if(mode==='ex')body=exHTML(p);
- return hd(p.title,['book'])+`<div class="row" style="margin-bottom:8px"><button class="btn s ${mode==='read'?'':'g'}" data-go="book" data-sub="p${p.id}">📖 קריאה</button><button class="btn s ${mode==='ex'?'':'g'}" data-go="book" data-sub="p${p.id}!ex">✍️ התרגילים בעמוד</button><button class="btn s ${mode==='cloze'?'':'g'}" data-go="book" data-sub="p${p.id}!cloze">🧩 השלמת מילים</button><button class="btn s g" data-x="editpage" data-id="${p.id}">✏️ עריכה</button><button class="btn s g" data-x="delpage" data-id="${p.id}">🗑</button></div>`+body}
+ return hd(p.title,['book'])+`<div class="row" style="margin-bottom:8px"><button class="btn s ${mode==='read'?'':'g'}" data-go="book" data-sub="p${p.id}">📖 קריאה</button><button class="btn s ${mode==='ex'?'':'g'}" data-go="book" data-sub="p${p.id}!ex">✍️ התרגילים בעמוד</button><button class="btn s ${mode==='cloze'?'':'g'}" data-go="book" data-sub="p${p.id}!cloze">🧩 השלמת מילים</button><label class="btn s g" title="הוספת עמוד נוסף לפרק הזה">➕ עוד עמוד<input type="file" accept="image/*" multiple id="imgadd" data-id="${p.id}" style="display:none"></label><button class="btn s g" data-x="editpage" data-id="${p.id}">✏️ עריכה</button><button class="btn s g" data-x="delpage" data-id="${p.id}">🗑</button></div>`+body}
 function parseKey(k){const m={};(k||'').replace(/(\d+)\s*[\.\)\-:]\s*([^\n]*?)(?=\s+\d+\s*[\.\)\-:]|\n|$)/g,(_,n,a)=>{m[n]=a.trim()});return m}
-function exItems(t){const items=[];const lines=t.split('\n').map(x=>x.trim()).filter(Boolean);let c=null;for(const l of lines){const m=l.match(/^\(?(\d{1,2}|[a-z])[\.\)]\s+(.*)$/i);if(m){c={n:m[1],t:m[2]};items.push(c)}else if(c&&!/^[A-Z][a-z]+\s*\d*$/.test(l)&&c.t.length<300)c.t+=' '+l}return items}
+function exItems(t){const items=[];let c=null;
+ for(const raw of t.split('\n')){const l=raw.trim();if(!l)continue;if(HEB.test(l)&&!LAT.test(l))continue;
+  let m=l.match(/^\(?(\d{1,2})[\.\)]\s*(.*)$/);
+  if(m){c={n:m[1],t:m[2],o:[]};items.push(c);continue}
+  if(!c)continue;
+  m=l.match(/^\(?([a-dA-D])[\.\)]\s+(.*)$/);
+  if(m){const ps=(' '+l).split(/\s\(?([a-dA-D])[\.\)]\s+/);for(let i=1;i<ps.length;i+=2)c.o.push({l:ps[i].toLowerCase(),t:(ps[i+1]||'').trim()});continue}
+  if(c.o.length){c.o[c.o.length-1].t+=' '+l;continue}
+  if(c.t.length<300&&!/^(unit|page|exercise|part|section)\b/i.test(l))c.t+=' '+l}
+ for(const c of items){if(!c.o.length){const parts=c.t.split(/\s\(?([a-dA-D])[\.\)]\s+/);if(parts.length>=5){c.t=parts[0].trim();c.o=[];for(let i=1;i<parts.length;i+=2)c.o.push({l:parts[i].toLowerCase(),t:(parts[i+1]||'').trim()})}}
+  c.mc=c.o.length>=2}
+ return items}
 function exHTML(p){const it=exItems(p.text);if(!it.length)return '<div class="card">לא מצאתי תרגילים ממוספרים (1. 2. 3.). בעריכה אפשר להוסיף מספרים בתחילת כל שאלה.</div>';const key=parseKey(p.key);
- return `<div class="mu">${Object.keys(key).length?'יש מפתח תשובות, אפשר לבדוק.':'אין מפתח תשובות, לכן אפשר לבדוק את עצמך בעזרת ההקראה, או להוסיף מפתח בעריכה.'}</div>`+it.map((x,i)=>{const blank=/_{2,}|\.{3,}|…/.test(x.t);return `<div class="card" data-n="${esc(x.n)}"><div class="row" style="justify-content:space-between"><b>${esc(x.n)}.</b><button class="btn s g" data-x="spkq" data-t="${esc(x.t.replace(/_{2,}|\.{3,}|…/g,' blank '))}">🔊</button></div><div class="en">${wordify(x.t)}</div><input class="en" placeholder="${blank?'מה חסר?':'התשובה שלך באנגלית'}" id="a${i}"><div class="row" style="margin-top:6px"><button class="btn s" data-x="chk" data-i="${i}" data-n="${esc(x.n)}">בדיקה</button></div><div id="r${i}"></div></div>`}).join('')}
-document.addEventListener('click',e=>{const x=e.target.dataset.x,d=e.target.dataset;
- if(x==='spkq')say(d.t,.75);
- if(x==='chk'){const p=S.pages.find(q=>'p'+q.id===V.sub.replace(/![a-z]+$/,''));const key=parseKey(p.key);const a=($('#a'+d.i).value||'').trim();const r=$('#r'+d.i);const kk=key[d.n];
+ return `<div class="mu">${Object.keys(key).length?'יש מפתח תשובות, אפשר לבדוק.':'אין מפתח תשובות, לכן הבדיקה היא עצמית. אפשר להוסיף מפתח בעריכה.'} ${it.filter(x=>x.mc).length} שאלות בחירה, ${it.filter(x=>!x.mc).length} שאלות אחרות.</div>`+it.map((x,i)=>{
+  if(x.mc)return `<div class="card" data-n="${esc(x.n)}"><div class="row" style="justify-content:space-between"><b>${esc(x.n)}.</b><button class="btn s g" data-x="spkq" data-t="${esc(x.t+'. '+x.o.map(o=>o.l+', '+o.t).join('. '))}">🔊</button></div><div class="en">${wordify(x.t)}</div><div>${x.o.map(o=>`<button class="mc enOpt" data-x="mc" data-i="${i}" data-n="${esc(x.n)}" data-l="${o.l}"><b>${o.l})</b> ${esc(o.t)}</button>`).join('')}</div><div id="r${i}"></div></div>`;
+  const blank=/_{2,}|\.{3,}|…/.test(x.t);return `<div class="card" data-n="${esc(x.n)}"><div class="row" style="justify-content:space-between"><b>${esc(x.n)}.</b><button class="btn s g" data-x="spkq" data-t="${esc(x.t.replace(/_{2,}|\.{3,}|…/g,' blank '))}">🔊</button></div><div class="en">${wordify(x.t)}</div><input class="en" placeholder="${blank?'מה חסר?':'התשובה שלך באנגלית'}" id="a${i}"><div class="row" style="margin-top:6px"><button class="btn s" data-x="chk" data-i="${i}" data-n="${esc(x.n)}">בדיקה</button></div><div id="r${i}"></div></div>`}).join('')}
+const curPage=()=>S.pages.find(q=>'p'+q.id===V.sub.replace(/![a-z]+$/,''));
+V.mt={};
+document.addEventListener('click',e=>{const x=e.target.closest('[data-x]');if(!x)return;const k=x.dataset.x,d=x.dataset;
+ if(k==='spkq')say(d.t,.75);
+ if(k==='mc'){const p=curPage(),key=parseKey(p.key),it=exItems(p.text)[+d.i],r=$('#r'+d.i),kk=key[d.n];const btns=[...document.querySelectorAll(`.mc[data-i="${d.i}"]`)];
+  if(!kk){btns.forEach(b=>b.classList.remove('sel'));x.classList.add('sel');r.innerHTML=`<div class="fb ok">בחרת ${d.l}. בדקי בספר: <button class="btn s g" data-x="self" data-v="1">✓ צדקתי</button> <button class="btn s g" data-x="self" data-v="0">✗ טעיתי</button></div>`;return}
+  const norm2=t=>t.toLowerCase().replace(/[^a-z0-9 ]/g,'').trim();const right=it.o.find(o=>(kk.length<=2&&o.l===kk.toLowerCase().replace(/[^a-d]/g,''))||norm2(o.t)===norm2(kk));const rl=right?right.l:null;
+  if(!rl){r.innerHTML='<div class="fb no">לא הצלחתי להתאים את מפתח התשובות לשאלה הזאת. בדקי את המפתח בעריכה (למשל: 3. b).</div>';return}
+  const t=V.mt[d.n]||0;
+  if(d.l===rl){x.classList.add('ok');btns.forEach(b=>b.disabled=true);if(t===0){gain(10,1)}else gain(4,1);burst(e);r.innerHTML=`<div class="fb ok">✅ נכון! ${rl}) ${esc(right.t)}</div>`}
+  else{x.classList.add('no');V.mt[d.n]=t+1;if(t+1>=2){btns.forEach(b=>{b.disabled=true;if(b.dataset.l===rl)b.classList.add('ok')});r.innerHTML=`<div class="fb no">התשובה הנכונה: <b>${rl}) ${esc(right.t)}</b></div>`}else r.innerHTML='<div class="fb no">לא בדיוק. נסי שוב, את יכולה 💪</div>'}}
+ if(k==='chk'){const p=curPage();const key=parseKey(p.key);const a=($('#a'+d.i).value||'').trim();const r=$('#r'+d.i);const kk=key[d.n];
   if(!a){r.innerHTML='<div class="fb no">כתבי תשובה קודם 🙂</div>';return}
   if(kk){const norm=s=>s.toLowerCase().replace(/[^a-z0-9' ]/g,'').replace(/\s+/g,' ').trim();if(norm(a)===norm(kk)){r.innerHTML='<div class="fb ok">✅ נכון!</div>';burst(e);gain(10,1)}else r.innerHTML=`<div class="fb no">לא בדיוק. נסי שוב, או הצצה: <button class="btn s g" data-x="peek" data-i="${d.i}" data-k="${esc(kk)}">הצג תשובה</button></div>`}
   else{r.innerHTML=`<div class="fb ok">התשובה שלך: <span class="en">${esc(a)}</span><br>האם זה נראה לך נכון? <button class="btn s g" data-x="self" data-v="1">✓ כן</button> <button class="btn s g" data-x="self" data-v="0">✗ לא</button></div>`}}
- if(x==='peek'){e.target.outerHTML=`<b class="en">${esc(d.k)}</b>`;say(d.k,.5)}
- if(x==='self'){e.target.parentElement.innerHTML=d.v==='1'?'👏 יופי! (+5 XP)':'זה בסדר, ככה לומדים. נסי לקרוא שוב את ההוראה.';if(d.v==='1'){gain(5,1);burst(e)}}
- if(x==='savepage'){const t=($('#bx').value||'').trim();if(!t)return;const title=($('#bt').value||'').trim()||('עמוד '+(S.pages.length+1)),key=$('#bk').value;if(V.draft&&V.draft.id){const p=S.pages.find(q=>q.id===V.draft.id);Object.assign(p,{title,text:t,key,cz:null})}else S.pages.push({id:Date.now(),title,text:t,key});V.draft=null;save();go('book')}
- if(x==='editpage'){const p=S.pages.find(q=>q.id==d.id);V.draft={id:p.id,title:p.title,text:p.text,key:p.key};go('book','edit')}
- if(x==='delpage'){if(confirm('למחוק את העמוד?')){S.pages=S.pages.filter(q=>q.id!=d.id);save();go('book')}}});
-document.addEventListener('change',async e=>{if(e.target.id!=='img')return;const f=e.target.files[0];if(!f)return;const st=$('#ocr');st.textContent='טוענת את מנוע הזיהוי (בפעם הראשונה לוקח כמה שניות)…';
- try{await loadOCR();const r=await Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')st.textContent='מזהה טקסט… '+Math.round(m.progress*100)+'%'}});V.draft={title:'',text:r.data.text.trim(),key:''};go('book','new')}catch(err){st.innerHTML='לא הצלחתי לזהות. אפשר להדביק את הטקסט ידנית או לנסות שוב עם תמונה חדה ובתאורה טובה.'}});
+ if(k==='peek'){x.outerHTML=`<b class="en">${esc(d.k)}</b>`;say(d.k,.7)}
+ if(k==='self'){x.parentElement.innerHTML=d.v==='1'?'👏 יופי! (+5 XP)':'זה בסדר, ככה לומדים. נסי לקרוא שוב את ההוראה.';if(d.v==='1'){gain(5,1);burst(e)}}
+ if(k==='engonly'){const t=$('#bx');t.value=t.value.split('\n').filter(l=>!l.trim()||(l.match(/[A-Za-z]/g)||[]).length>=(l.match(/[֐-׿]/g)||[]).length).join('\n')}
+ if(k==='savepage'){const t=($('#bx').value||'').trim();if(!t)return;const title=($('#bt').value||'').trim()||('עמוד '+(S.pages.length+1)),key=$('#bk').value;if(V.draft&&V.draft.id){const p=S.pages.find(q=>q.id===V.draft.id);Object.assign(p,{title,text:t,key,cz:null})}else S.pages.push({id:Date.now(),title,text:t,key});V.draft=null;save();go('book')}
+ if(k==='editpage'){const p=S.pages.find(q=>q.id==d.id);V.draft={id:p.id,title:p.title,text:p.text,key:p.key};go('book','edit')}
+ if(k==='delpage'){if(confirm('למחוק את העמוד?')){S.pages=S.pages.filter(q=>q.id!=d.id);save();go('book')}}
+ /* crop */
+ if(k==='rot'){BK.rot=(BK.rot+1)%4;BK.rect=null;drawCrop()}
+ if(k==='clrrect'){BK.rect=null;showRect()}
+ if(k==='runocr')runOCR()});
+document.addEventListener('change',e=>{if(e.target.id!=='img'&&e.target.id!=='imgadd')return;const fs=[...e.target.files];if(!fs.length)return;BK.files=fs;BK.i=0;BK.out=[];BK.rot=0;BK.rect=null;BK.append=e.target.id==='imgadd'?+e.target.dataset.id:null;go('book','crop')});
+function loadImg(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),i=new Image();i.onload=()=>{ok(i)};i.onerror=no;i.src=u})}
+async function initCrop(){const f=BK.files[BK.i];if(!f)return;try{BK.img=await loadImg(f)}catch(err){$('#ocr').textContent='לא הצלחתי לפתוח את התמונה';return}drawCrop()}
+function drawCrop(){const im=BK.img;if(!im||!$('#cv'))return;const r=BK.rot%2===1;const W=r?im.naturalHeight:im.naturalWidth,H=r?im.naturalWidth:im.naturalHeight;const k=Math.min(1,2400/Math.max(W,H));
+ const o=document.createElement('canvas');o.width=Math.round(W*k);o.height=Math.round(H*k);const c=o.getContext('2d');c.translate(o.width/2,o.height/2);c.rotate(BK.rot*Math.PI/2);const w=im.naturalWidth*k,h=im.naturalHeight*k;c.drawImage(im,-w/2,-h/2,w,h);BK.src=o;
+ const cv=$('#cv');const maxW=Math.min(innerWidth-56,720);BK.scale=Math.min(1,maxW/o.width);cv.width=Math.round(o.width*BK.scale);cv.height=Math.round(o.height*BK.scale);cv.getContext('2d').drawImage(o,0,0,cv.width,cv.height);showRect()}
+function showRect(){const el=$('#cr');if(!el)return;const r=BK.rect;if(!r){el.style.display='none';return}el.style.display='block';el.style.left=Math.min(r.x0,r.x1)+'px';el.style.top=Math.min(r.y0,r.y1)+'px';el.style.width=Math.abs(r.x1-r.x0)+'px';el.style.height=Math.abs(r.y1-r.y0)+'px'}
+(function(){let drag=false;const pos=(e,cv)=>{const b=cv.getBoundingClientRect();return[Math.max(0,Math.min(cv.width,(e.clientX-b.left)*cv.width/b.width)),Math.max(0,Math.min(cv.height,(e.clientY-b.top)*cv.height/b.height))]};
+ document.addEventListener('pointerdown',e=>{const w=e.target.closest('#cw');if(!w)return;const cv=$('#cv');drag=true;const[x,y]=pos(e,cv);BK.rect={x0:x,y0:y,x1:x,y1:y};try{w.setPointerCapture(e.pointerId)}catch(_){}showRect()});
+ document.addEventListener('pointermove',e=>{if(!drag||!BK.rect)return;const cv=$('#cv');if(!cv)return;const[x,y]=pos(e,cv);BK.rect.x1=x;BK.rect.y1=y;showRect()});
+ document.addEventListener('pointerup',()=>{drag=false;const r=BK.rect;if(r&&(Math.abs(r.x1-r.x0)<20||Math.abs(r.y1-r.y0)<20)){BK.rect=null;showRect()}})})();
+async function runOCR(){const st=$('#ocr');S.ocrLang=$('#ol').value;save();if(!BK.src){st.textContent='התמונה עוד נטענת…';return}
+ let sx=0,sy=0,sw=BK.src.width,sh=BK.src.height;const r=BK.rect;if(r){const k=1/BK.scale;sx=Math.min(r.x0,r.x1)*k;sy=Math.min(r.y0,r.y1)*k;sw=Math.abs(r.x1-r.x0)*k;sh=Math.abs(r.y1-r.y0)*k}
+ const up=Math.max(1,Math.min(2.5,1600/sw));const c=document.createElement('canvas');c.width=Math.round(sw*up);c.height=Math.round(sh*up);const g=c.getContext('2d');try{g.filter='grayscale(1) contrast(1.35)'}catch(_){}g.drawImage(BK.src,sx,sy,sw,sh,0,0,c.width,c.height);
+ st.textContent='טוענת את מנוע הזיהוי (בפעם הראשונה לוקח כמה שניות, ועם עברית יותר)…';
+ try{await loadOCR();const blob=await new Promise(r=>c.toBlob(r,'image/png'));const res=await Tesseract.recognize(blob,S.ocrLang,{logger:m=>{if(m.status==='recognizing text')st.textContent='מזהה טקסט… '+Math.round(m.progress*100)+'%';else if(/loading/.test(m.status))st.textContent='טוענת: '+m.status}});
+  BK.out.push(res.data.text.trim());
+  if(BK.i+1<BK.files.length){BK.i++;BK.rot=0;BK.rect=null;render();return}
+  const text=BK.out.join('\n\n');
+  if(BK.append){const p=S.pages.find(q=>q.id===BK.append);V.draft={id:p.id,title:p.title,text:p.text+'\n\n'+text,key:p.key};BK.append=null;go('book','edit')}
+  else{V.draft={title:'',text,key:''};go('book','new')}}
+ catch(err){st.innerHTML='לא הצלחתי לזהות. בדקי חיבור לאינטרנט, או נסי תמונה חדה יותר, אנגלית בלבד, או חיתוך של אזור קטן. אפשר גם להדביק את הטקסט ידנית.'}}
 /* ---- songs ---- */
 function vSong(){
  const s=S.song||{n:'',a:'',l:''};
