@@ -123,14 +123,15 @@ function vHome(){const goal=3,p=Math.min(1,S.today/goal);
 /* ---- quiz ---- */
 function quizHTML(qs,en,done){
  const q=qs[V.qi];if(!q)return `<div class="card"><h2>סיימת! 🎉</h2><p>ענית נכון על ${V.score} מתוך ${qs.length} בניסיון הראשון.</p><div class="row"><button class="btn" data-x="again">שוב</button><button class="btn g" data-go="${done[0]}" data-sub="${done[1]||''}">חזרה</button></div></div>`;
- return `<div class="card"><div class="mu">שאלה ${V.qi+1} מתוך ${qs.length}</div><div class="bar" style="margin:6px 0"><i style="width:${V.qi/qs.length*100}%"></i></div><h3 ${en?'class="en"':''}>${esc(q[0])}</h3>${q[4]?`<button class="btn s" data-x="qspk" data-t="${esc(q[4])}">🔊 השמעה</button>`:''}<div id="opts">${q[1].map((o,i)=>`<button class="opt ${en?'enOpt':''}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div></div>`}
+ return `<div class="card"><div class="mu">שאלה ${V.qi+1} מתוך ${qs.length}</div><div class="bar" style="margin:6px 0"><i style="width:${V.qi/qs.length*100}%"></i></div><h3 ${en?'class="en"':''}>${esc(q[0])}</h3>${q[4]?`<button class="btn s" data-x="qspk" data-t="${esc(q[4])}">🔊 השמעה</button>`:''}<div id="opts">${q[1].map((o,i)=>`<button class="opt ${en?'enOpt':''}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div>${V.qi>0?`<button class="btn s g" data-x="prevq" style="margin-top:10px">→ שאלה קודמת</button>`:''}</div>`}
 let tries=0;
 document.addEventListener('click',e=>{
  const o=e.target.closest('.opt');if(o&&CUR.qs){const q=CUR.qs[V.qi],i=+o.dataset.i;if(o.classList.contains('no'))return;
   if(i===q[2]){o.classList.add('ok');document.querySelectorAll('.opt').forEach(x=>x.disabled=true);if(tries===0){V.score++;gain(10,1)}else gain(3);burst(e);tries=0;
    $('#fb').innerHTML=`<div class="fb ok">✅ ${tries===0?'כל הכבוד!':'יפה, תיקנת!'} ${esc(q[3]||'')}</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}
   else{o.classList.add('no');tries++;$('#fb').innerHTML=`<div class="fb no">לא בדיוק. נסי שוב, את יכולה! ${tries>=2?'<br>💡 '+esc(q[3]||''):''}</div>`}}
- const x=e.target.dataset.x;if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){S.done[CUR.id]=1;save()}render()}
+ const x=e.target.dataset.x;if(x==='prevq'&&CUR.qs&&V.qi>0){V.qi--;tries=0;render();return}
+ if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){S.done[CUR.id]=1;save()}render()}
  if(x==='again'){V.qi=0;V.score=0;tries=0;render()}});
 let CUR={};
 /* ---- reading ---- */
