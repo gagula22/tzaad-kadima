@@ -250,14 +250,39 @@ async function runOCR(){const st=$('#ocr');S.ocrLang=$('#ol').value;save();if(!B
   else{V.draft={title:'',text,key:''};go('book','new')}}
  catch(err){st.innerHTML='לא הצלחתי לזהות. בדקי חיבור לאינטרנט, או נסי תמונה חדה יותר, אנגלית בלבד, או חיתוך של אזור קטן. אפשר גם להדביק את הטקסט ידנית.'}}
 /* ---- songs ---- */
+const SONGS=[
+["80s","Girls Just Want to Have Fun","Cyndi Lauper",1983,"A2","שיר על חופש, חברות וליהנות. אוצר מילים פשוט ויומיומי.","fun|כיף;night|לילה;sun|שמש;daughter|בת;phone|טלפון"],
+["80s","Take On Me","a-ha",1985,"A2","שיר אהבה קצר על הזדמנות ועל זמן. הרבה מילים קצרות ושימושיות.","day|יום;late|מאוחר;money|כסף;chance|הזדמנות;safe|בטוח"],
+["80s","Time After Time","Cyndi Lauper",1983,"B1","שיר רגוע על אהבה ועל מי שנמצא איתך גם ברגעים קשים.","time|זמן;fall|ליפול;lost|אבוד;hear|לשמוע;wait|לחכות"],
+["80s","Livin' on a Prayer","Bon Jovi",1986,"B1","סיפור על זוג צעיר שמתמודד עם קשיים ולא מוותר. מלא תקווה.","half|חצי;work|עבודה;hold on|להחזיק מעמד;halfway|באמצע הדרך;prayer|תפילה"],
+["80s","Every Breath You Take","The Police",1983,"B1","שיר על מעקב ועל קנאה, בקצב איטי. כדאי לשים לב לצורות של הווה.","breath|נשימה;move|לזוז;watch|לצפות;smile|חיוך;step|צעד"],
+["80s","Africa","Toto",1982,"B2","שיר על געגוע ועל מסע. אוצר מילים עשיר יותר ותמונות מהטבע.","rain|גשם;hear|לשמוע;drum|תוף;wild|פראי;miles|קילומטרים"],
+["80s","Eye of the Tiger","Survivor",1982,"B1","שיר על התמדה ועל חזרה אחרי נפילה. מתאים לתרגול זמן עבר.","fight|להילחם;rival|יריב;rise|לעלות;streets|רחובות;fire|אש"],
+["now","Shape of You","Ed Sheeran",2017,"B1","שיר היכרות ורומנטיקה, מלא ביטויים מדוברים.","shape|צורה;body|גוף;magnet|מגנט;club|מועדון;leave|לעזוב"],
+["now","Perfect","Ed Sheeran",2017,"B1","שיר אהבה איטי. מתאים לתרגול הווה מושלם ותיאורים.","perfect|מושלם;dance|לרקוד;dark|חשוך;stranger|זר;heart|לב"],
+["now","Someone Like You","Adele",2011,"B1","שיר פרידה וגעגוע. אוצר מילים של רגשות וזיכרונות.","memory|זיכרון;find|למצוא;rather|במקום;sorry|מצטער;regret|חרטה"],
+["now","Counting Stars","OneRepublic",2013,"B1","שיר על חלומות, כסף ובחירות בחיים.","dream|חלום;money|כסף;pray|להתפלל;bed|מיטה;change|לשנות"],
+["now","Believer","Imagine Dragons",2017,"B1","שיר על כאב שהופך לכוח. מתאים לתרגול מילים של רגש וכוח.","pain|כאב;trust|אמון;break|לשבור;power|כוח;silver|כסף (מתכת)"],
+["now","Blinding Lights","The Weeknd",2019,"B1","שיר על געגוע בלילה בעיר. תיאורים וזמנים פשוטים.","city|עיר;sleep|לישון;drive|לנהוג;blind|מסנוור;alone|לבד"],
+["now","As It Was","Harry Styles",2022,"B1","שיר על שינויים ועל געגוע ליום שהיה. מתאים לתרגול זמן עבר והווה.","change|שינוי;phone|טלפון;call|להתקשר;home|בית;answer|לענות"],
+["now","Flowers","Miley Cyrus",2023,"B1","שיר על עצמאות ועל לטפל בעצמך אחרי פרידה.","flower|פרח;buy|לקנות;talk|לדבר;hold|להחזיק;myself|עצמי"],
+["il","Toy","Netta (ישראל, אירוויזיון 2018)",2018,"B1","שיר על ביטחון עצמי ועל כוח נשי. שיר ישראלי שזכה באירוויזיון.","toy|צעצוע;girl|ילדה;proud|גאה;beautiful|יפה;strong|חזק"],
+["il","Unicorn","Noa Kirel (ישראל, אירוויזיון 2023)",2023,"B1","שיר על להיות מיוחדת ולא להתאים לתבנית. שיר ישראלי באנגלית.","special|מיוחד;rare|נדיר;different|שונה;own|שלי;free|חופשי"],
+["il","Set Me Free","Eden Alene (ישראל, אירוויזיון 2021)",2021,"B1","שיר על שחרור ועל התגברות. שיר ישראלי באנגלית.","free|חופשי;fly|לעוף;wings|כנפיים;chain|שרשרת;voice|קול"]
+];
 function vSong(){
  const s=S.song||{n:'',a:'',l:''};
  if(V.sub==='quiz'){const qs=V.sq||(V.sq=cloze(s.l,8));CUR={qs,id:null};return hd('חידון שיר',['song'])+(qs.length?quizHTML(qs,true,['song']):'<div class="card">הדביקי יותר שורות כדי ליצור חידון.</div>')}
  const lines=s.l.split('\n');
+ const se=V.se||'now',ES={now:'עכשוויים',"80s":'שנות ה-80',il:'ישראליים'};
  return hd('לומדים משיר',['home'])+`<div class="card"><b>1. איזה שיר?</b><div class="row" style="margin-top:6px"><input id="sn" placeholder="שם השיר" value="${esc(s.n)}" class="en" style="flex:1;min-width:140px"><input id="sa" placeholder="אמן/ית" value="${esc(s.a)}" class="en" style="flex:1;min-width:120px"></div><div class="row" style="margin-top:8px"><button class="btn s" data-x="yt">▶️ האזנה ב-YouTube</button><button class="btn s g" data-x="lyr">🔎 חיפוש המילים</button></div><p class="mu">מילות השירים מוגנות בזכויות יוצרים, ולכן האפליקציה לא מכילה אותן. פתחי את המילים באתר מורשה (למשל Genius), העתיקי בית אחד או שניים, והדביקי כאן.</p></div>
  <div class="card"><b>2. הדביקי את השורות</b><textarea class="en" id="sl" placeholder="הדביקי כאן בית ראשון…">${esc(s.l)}</textarea><button class="btn s" style="margin-top:8px" data-x="songsv">שמרי ולמדי</button></div>`+
- (s.l.trim()?`<div class="card"><div class="row" style="justify-content:space-between"><b>3. ללמוד שורה אחרי שורה</b>${ctl()}</div><div class="mu">🔊 על שורה = הקראה · לחצי על מילה = תרגום · 🌐 = תרגום השורה</div>${lines.map((l,i)=>l.trim()?`<div class="line snt" data-t="${esc(l)}"><span class="n">${i+1}</span><span class="en" style="flex:1">${wordify(l)}</span><button class="btn s g" data-x="spkq" data-t="${esc(l)}">🔊</button><button class="btn s g" data-x="ltr" data-t="${esc(l)}">🌐</button></div><div class="mu" id="lt${i}" style="padding-inline:30px"></div>`:'<div class="gap"></div>').join('')}<button class="btn" style="margin-top:10px" data-go="song" data-sub="quiz">🧩 חידון השלמת מילים ←</button></div>`:'')}
+ (s.l.trim()?`<div class="card"><div class="row" style="justify-content:space-between"><b>3. ללמוד שורה אחרי שורה</b>${ctl()}</div><div class="mu">🔊 על שורה = הקראה · לחצי על מילה = תרגום · 🌐 = תרגום השורה</div>${lines.map((l,i)=>l.trim()?`<div class="line snt" data-t="${esc(l)}"><span class="n">${i+1}</span><span class="en" style="flex:1">${wordify(l)}</span><button class="btn s g" data-x="spkq" data-t="${esc(l)}">🔊</button><button class="btn s g" data-x="ltr" data-t="${esc(l)}">🌐</button></div><div class="mu" id="lt${i}" style="padding-inline:30px"></div>`:'<div class="gap"></div>').join('')}<button class="btn" style="margin-top:10px" data-go="song" data-sub="quiz">🧩 חידון השלמת מילים ←</button></div>`:'')+
+ `<div class="card"><b>🎵 שירים מומלצים ללימוד</b><div class="mu">בחרתי שירים מוכרים; לא בדקתי מה פופולרי כרגע בישראל. האפליקציה לא מכילה את המילים (זכויות יוצרים): לחצי על שיר, האזיני לו ב-YouTube, והדביקי בית אחד.</div><div class="row" style="margin:8px 0">${Object.keys(ES).map(k=>`<button class="btn s ${k===se?'':'g'}" data-x="sera" data-k="${k}">${ES[k]}</button>`).join('')}</div>${SONGS.map((r,i)=>r[0]===se?`<div class="line" style="flex-direction:column;align-items:stretch;gap:4px"><div class="row" style="justify-content:space-between"><b class="en">${esc(r[1])}</b><span class="mu">${r[4]}</span></div><div class="mu en" style="direction:ltr;text-align:left">${esc(r[2])} · ${r[3]}</div><div>${esc(r[5])}</div><div class="mu">${r[6].split(';').map(w=>w.split('|').join(' – ')).join(' · ')}</div><div class="row"><button class="btn s" data-x="pick" data-i="${i}">בחרי שיר</button><button class="btn s g" data-x="pickw" data-i="${i}">⭐ שמרי את המילים</button></div></div>`:'').join('')}</div>`}
 document.addEventListener('click',async e=>{const x=e.target.dataset.x;
+ if(x==='sera'){V.se=e.target.dataset.k;render();return}
+ if(x==='pick'){const r=SONGS[+e.target.dataset.i];S.song={n:r[1],a:r[2].replace(/\s*\(.*\)/,''),l:''};V.sq=null;save();scrollTo(0,0);render();return}
+ if(x==='pickw'){const r=SONGS[+e.target.dataset.i];r[6].split(';').forEach(w=>{const[a,b]=w.split('|');addWord(a,b)});e.target.textContent='✔ נשמרו';gain(2,1);return}
  if(x==='yt'){const q=encodeURIComponent(($('#sn').value+' '+$('#sa').value+' official video').trim());open('https://www.youtube.com/results?search_query='+q,'_blank')}
  if(x==='lyr'){const q=encodeURIComponent(($('#sn').value+' '+$('#sa').value+' lyrics').trim());open('https://www.google.com/search?q='+q,'_blank')}
  if(x==='songsv'){S.song={n:$('#sn').value,a:$('#sa').value,l:$('#sl').value};V.sq=null;save();gain(5,1);render()}
