@@ -379,8 +379,8 @@ function vBgVocab(u){const band=u==='3'?['P1','1a','1b','2a','2b']:u==='4'?['2a'
  if(!q)return hd('אוצר מילים לבגרות',['bg'])+`<div class="card"><h2>סיימת! 🎉</h2><p>${B.sc} מתוך ${B.q.length} בניסיון ראשון.</p>${B.h.length?`<div class="mu"><b>💪 לחיזוק:</b></div>${B.h.map(h=>`<div class="line"><span class="en">${esc(h[0])}</span><span class="mu"> – ${esc(h[1])}</span></div>`).join('')}<button class="btn s" data-x="bgvsave">⭐ שמרי למילים שלי</button>`:''}<div class="row" style="margin-top:10px"><button class="btn" data-x="bgvagain">סבב חדש</button><button class="btn g" data-go="bg">חזרה</button></div></div>`;
  return hd('אוצר מילים לבגרות',['bg'])+`<div class="mu">מילים מרשימות משרד החינוך (${band.map(b=>LBL[b]||b).join(', ')}). בבחינה: השלמה, ברירה והתאמה.</div><div class="card"><div class="mu">שאלה ${B.i+1} מתוך ${B.q.length}</div><div class="bar" style="margin:6px 0"><i style="width:${B.i/B.q.length*100}%"></i></div><h3 class="en" style="direction:ltr;text-align:left">${esc(q.q)}</h3><div id="bvo">${q.o.map((o,j)=>`<button class="opt enOpt" data-x="bgvo" data-j="${j}">${esc(o)}</button>`).join('')}</div><div id="bvf"></div></div>`}
 function bvBuild(pool){const out=[],P=pickN(pool,16);const ms=[...new Set(pool.map(x=>x[3]))];
- P.slice(0,8).forEach(x=>{const d=pickN(ms.filter(m=>m!==x[3]),3),o=pickN([x[3],...d],4);out.push({q:'What does "'+x[0]+'" mean?',o,a:o.indexOf(x[3]),w:x[0],m:x[3]})});
- P.slice(8,16).forEach(x=>{const d=pickN(P.filter(y=>y!==x).map(y=>y[0]),3),o=pickN([x[0],...d],4);out.push({q:'Which word means: '+x[3]+'?',o,a:o.indexOf(x[0]),w:x[0],m:x[3]})});
+ P.slice(0,8).forEach(x=>{const d=pickN(ms.filter(m=>m!==x[3]),3),o=pickN([x[3],...d],4);out.push({q:'What does "'+x[0]+'" mean?',o,a:o.indexOf(x[3]),w:x[0],m:x[3],l:LBL[x[2]]||x[2]})});
+ P.slice(8,16).forEach(x=>{const d=pickN(P.filter(y=>y!==x).map(y=>y[0]),3),o=pickN([x[0],...d],4);out.push({q:'Which word means: '+x[3]+'?',o,a:o.indexOf(x[0]),w:x[0],m:x[3],l:LBL[x[2]]||x[2]})});
  return pickN(out,out.length)}
 document.addEventListener('click',e=>{const t=e.target,x=t.dataset&&t.dataset.x;if(!x||V.tab!=='bg')return;
  const mk=(id)=>{V.br=V.br||{};return V.br[id]||(V.br[id]={a:{},d:{}})};
@@ -396,7 +396,7 @@ document.addEventListener('click',e=>{const t=e.target,x=t.dataset&&t.dataset.x;
  if(x==='bgself'){const p=BGR.find(z=>z.id===t.dataset.p),R=mk(p.id);R.d[+t.dataset.i].self=+t.dataset.v;render()}
  if(x==='bgrdone'){const p=BGR.find(z=>z.id===t.dataset.p),R=mk(p.id);const pts=p.q.reduce((s,q,i)=>{const r=R.d[i];return s+(r?(q.t==='open'?(r.self===1?1:0):(r.ok?1:0)):0)},0);S.bg=S.bg||{};S.bg.r=S.bg.r||{};S.bg.r[p.id]={sc:Math.round(pts/p.q.length*100),d:today()};S.done['bg'+p.id]=1;gain(15,1);save();t.textContent='✔ נשמר'}
  if(x==='bgrreset'){delete V.br[t.dataset.p];render()}
- if(x==='bgvo'){const B=V.bv,q=B.q[B.i],j=+t.dataset.j;if(j===q.a){B.first=B.first!==false;if(B.first)B.sc++;B.first=null;t.classList.add('ok');document.querySelectorAll('#bvo .opt').forEach(o=>o.disabled=true);$('#bvf').innerHTML=`<div class="fb ok">✅ ${esc(q.w)} = ${esc(q.m)}</div><button class="btn" data-x="bgvn">הבאה ←</button>`;gain(5)}
+ if(x==='bgvo'){const B=V.bv,q=B.q[B.i],j=+t.dataset.j;if(j===q.a){B.first=B.first!==false;if(B.first)B.sc++;B.first=null;t.classList.add('ok');document.querySelectorAll('#bvo .opt').forEach(o=>o.disabled=true);$('#bvf').innerHTML=`<div class="fb ok">✅ ${esc(q.w)} = ${esc(q.m)}${q.l?' <span class="tag">'+esc(q.l)+'</span>':''}</div><button class="btn" data-x="bgvn">הבאה ←</button>`;gain(5)}
   else{t.classList.add('no');t.disabled=true;if(B.first===null||B.first===undefined){B.h.push([q.w,q.m]);B.first=false}$('#bvf').innerHTML='<div class="fb no">לא בדיוק. נסי שוב 🙂</div>'}}
  if(x==='bgvn'){V.bv.i++;V.bv.first=undefined;render()}
  if(x==='bgvagain'){V.bv=null;render()}
@@ -931,6 +931,34 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-x]');if(!t
  if(x==='ltwcopy'){const W=S.bg.lw||{};try{navigator.clipboard.writeText(Object.entries(W).map(([k,v])=>k+': '+v).join('\n\n'));t.textContent='✔ הועתק'}catch(_){}}
  if(x==='ltwclr'){if(confirm('לנקות את הדף?')){S.bg.lw={};save();render()}}});
 const _vBg5=vBg;vBg=function(){const s=V.sub||'';if(s==='lt'||s.startsWith('lt:'))return vLit(s);let h=_vBg5();return s?h:h+`<button class="tile" style="width:100%;margin:8px 0;text-align:right;min-height:0" data-go="bg" data-sub="lt"><b>🎭 כלי ניתוח ספרותי</b><small style="display:block">מושגים, זיהוי אמצעים, תגובה אישית</small></button>`};
+/* ---- vocabulary by Ministry band and list (Band I, Band II, Band III lists A-D) ---- */
+const BANDI=['P1','1a','1b'],BANDII=['2a','2b'],BANDIII=['LA','LB','LC','LD'];
+const BVMIX={'3':[['P1','1a','1b','2a','2b'],null],'4':[[.15,.35,.5],null],'5':[[.1,.3,.6],null]};
+const BVF=[['all','הכול (כמו במבחן)'],['I','Band I'],['II','Band II'],['LA','List A'],['LB','List B'],['LC','List C'],['LD','List D']];
+function bvPool(u,f){const ok=x=>x[3]&&/^[a-z]+$/i.test(x[0]);
+ if(f!=='all'){const set=f==='I'?BANDI:f==='II'?BANDII:[f];return WM.filter(x=>ok(x)&&set.includes(x[2]))}
+ if(u==='3')return WM.filter(x=>ok(x)&&['P1','1a','1b','2a','2b'].includes(x[2]));
+ const w=BVMIX[u][0],n=120,take=(set,k)=>pickN(WM.filter(x=>ok(x)&&set.includes(x[2])),Math.round(k));
+ return [...take(BANDI,n*w[0]),...take(BANDII,n*w[1]),...take(BANDIII,n*w[2])]}
+function bvListStats(){const out={};WM.forEach(x=>{const b=x[2];const k=x[0].split(',')[0].trim().toLowerCase();out[b]=out[b]||{n:0,s:0};out[b].n++;if(S.words&&S.words[k])out[b].s++});return out}
+vBgVocab=function(u){const f=V.bvf||'all',key=u+'|'+f;
+ V.bv=V.bv||{};if(!V.bv.q||V.bv.u!==key){V.bv={u:key,q:bvBuild(bvPool(u,f)),i:0,sc:0,h:[]}}
+ const B=V.bv,q=B.q[B.i],chips=`<div class="row" style="flex-wrap:wrap;margin:6px 0">${BVF.map(c=>`<button class="btn s ${f===c[0]?'':'g'}" data-x="bvf" data-v="${c[0]}">${c[1]}</button>`).join('')}</div>`;
+ if(!q)return hd('אוצר מילים לבגרות',['bg'])+`<div class="card"><h2>סיימת! 🎉</h2><p>${B.sc} מתוך ${B.q.length} בניסיון ראשון.</p>${B.h.length?`<div class="mu"><b>💪 לחיזוק:</b></div>${B.h.map(h=>`<div class="line"><span class="en">${esc(h[0])}</span><span class="mu"> – ${esc(h[1])}</span></div>`).join('')}<button class="btn s" data-x="bgvsave">⭐ שמרי למילים שלי</button>`:''}<div class="row" style="margin-top:10px"><button class="btn" data-x="bgvagain">סבב חדש</button><button class="btn g" data-go="bg">חזרה</button></div></div>`;
+ const st=bvListStats(),row=(lab,keys)=>{const n=keys.reduce((a,k)=>a+(st[k]?st[k].n:0),0),s=keys.reduce((a,k)=>a+(st[k]?st[k].s:0),0);return `<div class="line" style="display:flex;justify-content:space-between"><span>${lab}</span><span class="mu">${s} מתוך ${n} נשמרו</span></div>`};
+ return hd('אוצר מילים לבגרות',['bg'])+`<div class="mu">מילים מרשימות משרד החינוך. Band I הוא רמת היסודי, Band II חטיבת ביניים, וב-Band III יש ארבע רשימות (A–D). במבחן Module E (4–5 יח"ל) השאלות לקוחות מכל הרמות, והתערובת כאן היא הערכה שלי.</div>${chips}<div class="card"><div class="mu">שאלה ${B.i+1} מתוך ${B.q.length}</div><div class="bar" style="margin:6px 0"><i style="width:${B.i/B.q.length*100}%"></i></div><h3 class="en" style="direction:ltr;text-align:left">${esc(q.q)}</h3><div id="bvo">${q.o.map((o,j)=>`<button class="opt enOpt" data-x="bgvo" data-j="${j}">${esc(o)}</button>`).join('')}</div><div id="bvf"></div></div><div class="card"><b>📈 המילים שלי לפי רשימה</b>${row('Band I',BANDI)}${row('Band II',BANDII)}${BANDIII.map((k,i)=>row('List '+'ABCD'[i],[k])).join('')}<div class="mu" style="margin-top:6px">שמירת מילים נעשית בכרטיסיות. רשימה D נכנסת לבחינות מחורף 2026.</div><a class="mu" href="https://pop.education.gov.il/tchumey_daat/english/chativa-elyona/bagrut-exam/teachers-resource-materials/" target="_blank" rel="noopener">רשימות המילים הרשמיות באתר המשרד ↗</a></div>`};
+const _vocabItems=vocabItems;vocabItems=function(exId,u){return _vocabItems2(exId,u)};
+function _vocabItems2(exId,u){const R=rng(hash(exId)),sh=a=>a.map(v=>[R(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+ const ok=x=>x[3]&&/^[a-z]+$/i.test(x[0]),by=set=>WM.filter(x=>ok(x)&&set.includes(x[2])).sort((a,b)=>a[0]<b[0]?-1:1);
+ const w=u==='4'?[.15,.35,.5]:[.1,.3,.6],n=60,P=sh([...sh(by(BANDI)).slice(0,Math.round(n*w[0])),...sh(by(BANDII)).slice(0,Math.round(n*w[1])),...sh(by(BANDIII)).slice(0,Math.round(n*w[2]))]),ms=P.map(x=>x[3]);let k=0;const tasks=[];
+ for(let t=0;t<5;t++){const items=[];
+  if(t===2){const ws=P.slice(k,k+3);k+=3;const opts=sh(ws.map(x=>x[3]));tasks.push({type:'match',title:'Match each word to its meaning',items:ws.map(x=>({w:x[0],m:x[3]})),opts});continue}
+  for(let i=0;i<3;i++){const x=P[k++];const wm=t%2===0;
+   if(wm){const d=sh(ms.filter(m=>m!==x[3])).slice(0,3),o=sh([x[3],...d]);items.push({q:'What does "'+x[0]+'" mean?',o,a:o.indexOf(x[3]),w:x[0],m:x[3]})}
+   else{const d=sh(P.filter(y=>y!==x).map(y=>y[0])).slice(0,3),o=sh([x[0],...d]);items.push({q:'Which word means: '+x[3]+'?',o,a:o.indexOf(x[0]),w:x[0],m:x[3]})}}
+  tasks.push({type:'mc',title:t%2===0?'Choose the correct meaning':'Choose the correct word',items})}
+ return tasks}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-x=bvf]');if(!t||V.tab!=='bg')return;V.bvf=t.dataset.v;V.bv=null;render()});
 /* ---- extras: accessibility, exam study plan, parent report, install ---- */
 const ACC=()=>S.acc||{fs:0,sp:0,slow:0,calm:0};
 function accSp(){return ACC().slow?0.75:1}
