@@ -153,16 +153,17 @@ const qkey=q=>q[0]+'|'+q[1][q[2]];
 function hardUpdate(q,w){S.hardq=S.hardq||[];const k=qkey(q),i=S.hardq.findIndex(h=>h.k===k);
  if(w>=2){const lab=quizLabel().lab,t=new Date(Date.now()+864e5).toISOString().slice(0,10);
   if(i>=0){S.hardq[i].n++;S.hardq[i].ok=0;S.hardq[i].due=t}
-  else{S.hardq.push({k,q:[q[0],q[1].slice(),q[2],q[3]||'',q[4]||''],lab,n:1,ok:0,due:t});if(S.hardq.length>80)S.hardq.shift();
+  else{S.hardq.push({k,q:[q[0],q[1].slice(),q[2],q[3]||'',q[4]||''],lab,n:1,ok:0,due:t});if(S.hardq.length>150){let bi=0;S.hardq.slice(0,-1).forEach((h,j)=>{if(h.ok>S.hardq[bi].ok)bi=j});S.hardq.splice(bi,1)}
    if(q[4]&&/^[A-Za-z' ]+$/.test(q[4])){const w0=q[4].toLowerCase(),he=((q[3]||'').split(' = ')[1]||'');(async()=>{const h=/[\u0590-\u05FF]/.test(he)?he:await trans(w0);addWord(w0,h||'');if(S.words[w0]){S.words[w0].box=0;S.words[w0].due=today();save()}})()}}}
- else if(w===0&&i>=0){S.hardq[i].ok++;S.hardq[i].due=new Date(Date.now()+(S.hardq[i].ok*2)*864e5).toISOString().slice(0,10);if(S.hardq[i].ok>=2)S.hardq.splice(i,1)}
+ else if(w>=1&&i>=0){S.hardq[i].ok=0;S.hardq[i].due=new Date(Date.now()+864e5).toISOString().slice(0,10)}
+ else if(w===0&&i>=0){S.hardq[i].ok++;S.hardq[i].due=new Date(Date.now()+(S.hardq[i].ok*2)*864e5).toISOString().slice(0,10);if(S.hardq[i].ok>=3)S.hardq.splice(i,1)}
  save()}
 const hardDue=()=>(S.hardq||[]).filter(h=>h.due<=today());
 function hardQs(){const d=hardDue(),rest=(S.hardq||[]).filter(h=>!d.includes(h));return pickN(d,8).concat(pickN(rest,Math.max(0,8-Math.min(d.length,8)))).slice(0,8).map(h=>{const c=h.q[1][h.q[2]],o=pickN(h.q[1],h.q[1].length);return[h.q[0],o,o.indexOf(c),h.q[3],h.q[4]||undefined]})}
 function vHard(){const n=(S.hardq||[]).length,d=hardDue().length;
  if(V.sub==='quiz'){if(!V.hq||!V.hq.length)V.hq=hardQs();CUR={qs:V.hq,id:null};return hd('חזרה על קשות',['hard'])+(V.hq.length?quizHTML(V.hq,false,['hard']):'<div class="card">אין שאלות קשות כרגע 🎉</div>')}
  V.hq=null;
- return hd('חזרה על קשות',['home'])+`<div class="card"><b>🔁 שאלות ומילים שדרשו כמה ניסיונות</b><p class="mu">שאלה שלא נענתה נכון גם בניסיון השני נכנסת לכאן וחוזרת בימים הבאים. אחרי שתי תשובות נכונות בניסיון ראשון היא יוצאת מהרשימה.</p><div class="mu">${n} ברשימה · ${d} לחזרה היום</div><div class="row" style="margin-top:8px"><button class="btn" data-go="hard" data-sub="quiz" ${n?'':'disabled'}>🔁 תרגול עכשיו</button></div></div>`+(n?`<div class="card"><b>מה ברשימה</b>${S.hardq.slice().reverse().slice(0,20).map(h=>`<div class="line" style="flex-direction:column;align-items:stretch"><div>${esc(h.q[0])}</div><div class="mu">✔ ${esc(h.q[1][h.q[2]])} · ${esc(h.lab)} · ${h.n}×</div></div>`).join('')}</div>`:'')}
+ return hd('חזרה על קשות',['home'])+`<div class="card"><b>🔁 שאלות ומילים שדרשו כמה ניסיונות</b><p class="mu">שאלה שלא נענתה נכון גם בניסיון השני נכנסת לכאן וחוזרת בימים הבאים. היא נשארת ברשימה עד שתענו עליה נכון בניסיון ראשון שלוש פעמים ברצף. טעות באמצע מאפסת את הספירה.</p><div class="mu">${n} ברשימה · ${d} לחזרה היום</div><div class="row" style="margin-top:8px"><button class="btn" data-go="hard" data-sub="quiz" ${n?'':'disabled'}>🔁 תרגול עכשיו</button></div></div>`+(n?`<div class="card"><b>מה ברשימה</b>${S.hardq.slice().reverse().slice(0,20).map(h=>`<div class="line" style="flex-direction:column;align-items:stretch"><div>${esc(h.q[0])}</div><div class="mu">✔ ${esc(h.q[1][h.q[2]])} · ${esc(h.lab)} · ${h.n}×</div></div>`).join('')}</div>`:'')}
 const LVS=['A2','B1','B2'];
 function adviceHTML(){const a=S.ad||{ok:0,bad:0},p=S.prof;if(!p||!p.lv)return '';const i=LVS.indexOf(p.lv);if(i<0)return '';
  if(a.ok>=6&&i<2)return `<div class="fb ok" style="margin-top:10px">🚀 הצלחת הרבה בלי עזרה. רוצה לנסות רמה גבוהה יותר (${LVS[i+1]})?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i+1]}">כן, בואי ננסה</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;
