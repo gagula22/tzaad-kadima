@@ -112,6 +112,7 @@ function after(){tips();if(V.tab==='book'&&V.sub==='crop')initCrop();const q=CUR
 function due(){const t=today();return Object.entries(S.words).filter(([k,v])=>v.due<=t)}
 function vHome(){const goal=3,p=Math.min(1,S.today/goal);
  return hd()+`<div class="card"><h2>היי${S.prof&&S.prof.name?' '+esc(S.prof.name):''}! מה לומדים היום? 👋</h2>${S.prof?`<div class="mu">הרמה שלך: ${S.prof.lv} · <a href="#" data-go="prof">עריכת פרופיל</a></div>`:`<div class="fb ok"><b>כדי להתאים הכול אלייך:</b> <button class="btn s" data-go="prof">⚙️ הגדרת פרופיל</button></div>`}<div class="mu">יעד יומי: ${goal} פעילויות. עשית ${Math.min(S.today,goal)}.</div><div class="bar" style="margin:8px 0"><i style="width:${p*100}%"></i></div>${p>=1?'🎉 עמדת ביעד היומי!':''}</div>
+ ${weekCard()}
  <div class="grid">
  <button class="tile" data-go="read"><span class="ic">📖</span>קריאה קצרה<br><small>נושא שאת אוהבת</small></button>
  <button class="tile" data-go="book"><span class="ic">📷</span>הספר שלי<br><small>צלמי עמוד ותרגלי</small></button>
@@ -126,13 +127,34 @@ function vHome(){const goal=3,p=Math.min(1,S.today/goal);
 function quizHTML(qs,en,done){
  const q=qs[V.qi];if(!q)return summaryHTML(qs,done);
  return `<div class="card"><div class="mu">שאלה ${V.qi+1} מתוך ${qs.length}</div><div class="bar" style="margin:6px 0"><i style="width:${V.qi/qs.length*100}%"></i></div><h3 ${en?'class="en"':''}>${esc(q[0])}</h3>${q[4]?`<button class="btn s" data-x="qspk" data-t="${esc(q[4])}">🔊 השמעה</button>`:''}<div id="opts">${q[1].map((o,i)=>`<button class="opt ${en?'enOpt':''}" data-i="${i}">${esc(o)}</button>`).join('')}</div><div id="fb"></div>${V.qi>0?`<button class="btn s g" data-x="prevq" style="margin-top:10px">→ שאלה קודמת</button>`:''}</div>`}
+function quizLabel(){const t=V.tab,id=CUR.id;
+ if(t==='read'){const p=READ.find(x=>x.id===id);return p?{lab:'קריאה: '+p.t,tab:'read',id:p.base||p.id}:{lab:'קריאה',tab:'read'}}
+ if(t==='lib'){const p=LIB.find(x=>x.id===id);return {lab:'ספרייה'+(p?': '+p.t:''),tab:'lib',id}}
+ if(t==='w3')return {lab:'אוצר מילים',tab:'w3'};if(t==='song')return {lab:'שיר',tab:'song'};if(t==='book')return {lab:'הספר שלי',tab:'book'};return {lab:t||'תרגול',tab:t}}
+function logQuiz(){const n=CUR.qs.length,l=quizLabel();S.log=S.log||[];S.log.push({d:today(),lab:l.lab,tab:l.tab,id:l.id||null,n,ok:V.score,miss:[...(V.miss||[])].length});if(S.log.length>300)S.log=S.log.slice(-300)}
+function weekStats(){const lim=new Date(Date.now()-6*864e5).toISOString().slice(0,10),L=(S.log||[]).filter(x=>x.d>=lim),by={};
+ L.forEach(x=>{const b=by[x.lab]=by[x.lab]||{lab:x.lab,tab:x.tab,id:x.id,n:0,ok:0,runs:0};b.n+=x.n;b.ok+=x.ok;b.runs++});
+ const arr=Object.values(by).map(b=>({...b,pc:b.n?b.ok/b.n:0}));
+ return {runs:L.length,strong:arr.filter(b=>b.n>=3&&b.pc>=.8).sort((a,b)=>b.pc-a.pc).slice(0,3),weak:arr.filter(b=>b.n>=3&&b.pc<.6).sort((a,b)=>a.pc-b.pc).slice(0,3),total:arr.reduce((a,b)=>a+b.n,0),ok:arr.reduce((a,b)=>a+b.ok,0)}}
+function weekCard(){const w=weekStats();if(!w.runs)return `<div class="card"><b>📊 השבוע שלך</b><div class="mu">עוד אין תרגולים השבוע. סיימי חידון אחד והסיכום יופיע כאן.</div></div>`;
+ const chip=(b,c)=>`<button class="btn s ${c}" data-go="${b.tab}" data-sub="${b.id||''}">${esc(b.lab)} · ${Math.round(b.pc*100)}%</button>`;
+ return `<div class="card"><b>📊 השבוע שלך</b><div class="mu" style="margin:4px 0">${w.runs} תרגולים · ${w.ok} מתוך ${w.total} תשובות נכונות בניסיון ראשון (${Math.round(w.ok/w.total*100)}%)</div>
+ ${w.strong.length?`<div style="margin-top:6px">💪 חזק אצלך:</div><div class="row" style="flex-wrap:wrap">${w.strong.map(b=>chip(b,'')).join('')}</div>`:''}
+ ${w.weak.length?`<div style="margin-top:6px">🌱 לחיזוק:</div><div class="row" style="flex-wrap:wrap">${w.weak.map(b=>chip(b,'g')).join('')}</div>`:'<div class="mu" style="margin-top:6px">אין נושא שדורש חיזוק מיוחד. כל הכבוד!</div>'}
+ <div class="row" style="margin-top:8px"><button class="btn s" data-go="words" data-sub="study">🃏 ${due().length} מילים לחזרה</button></div></div>`}
+async function saveMissWords(qs,btn){const miss=[...(V.miss||[])];const STOPS=STOP;const cand=[];
+ for(const i of miss){const q=qs[i];if(q[4]&&/^[A-Za-z' ]+$/.test(q[4])){const he=(q[3]||'').split(' = ')[1];cand.push([q[4].toLowerCase(),he&&/[\u0590-\u05FF]/.test(he)?he:null]);continue}
+  const ev=(q[3]||'').replace(/^המשפט:\s*/,'').replace(/\([^)]*\)/g,'');const ws=[...new Set((ev.match(/[A-Za-z]{5,}/g)||[]).map(x=>x.toLowerCase()).filter(w=>!STOPS.has(w)))].slice(0,2);ws.forEach(w=>cand.push([w,null]))}
+ const seen=new Set(),list=cand.filter(([w])=>!seen.has(w)&&seen.add(w)).slice(0,8);btn.disabled=true;btn.textContent='שומרת…';let n=0;
+ for(const [w,he] of list){const h=he||await trans(w);if(!S.words[w]){addWord(w,h||'');n++}else{S.words[w].box=0;S.words[w].due=today();save()}}
+ btn.textContent=list.length?'✔ '+list.length+' מילים נוספו לכרטיסיות לחזרה':'לא נמצאו מילים לשמירה'}
 const LVS=['A2','B1','B2'];
 function adviceHTML(){const a=S.ad||{ok:0,bad:0},p=S.prof;if(!p||!p.lv)return '';const i=LVS.indexOf(p.lv);if(i<0)return '';
  if(a.ok>=6&&i<2)return `<div class="fb ok" style="margin-top:10px">🚀 הצלחת הרבה בלי עזרה. רוצה לנסות רמה גבוהה יותר (${LVS[i+1]})?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i+1]}">כן, בואי ננסה</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;
  if(a.bad>=4&&i>0)return `<div class="fb ok" style="margin-top:10px">🌱 אפשר לתרגל עוד קצת ברמה נוחה יותר (${LVS[i-1]}) ולחזור לכאן אחר כך. מתאים לך?<div class="row" style="margin-top:8px"><button class="btn s" data-x="lvset" data-v="${LVS[i-1]}">כן, נוח לי</button><button class="btn s g" data-x="lvkeep">נשארת ברמה</button></div></div>`;return ''}
 function summaryHTML(qs,done){const miss=[...(V.miss||[])].sort((a,b)=>a-b),n=qs.length,ok=V.score;
  const msg=ok===n?'מושלם! כל התשובות בניסיון הראשון 🌟':ok>=n*.6?'יפה מאוד, את בכיוון הנכון 👏':'התחלה טובה. כל תרגול משפר 💪';
- return `<div class="card"><h2>סיימת! 🎉</h2><p>${msg}</p><p class="mu">${ok} מתוך ${n} בניסיון הראשון${miss.length?` · ${miss.length} לחיזוק`:''}</p>${miss.length?`<div class="mu" style="margin:6px 0 2px"><b>💪 לחיזוק, כדאי לחזור על:</b></div>${miss.map(i=>`<div class="line" style="flex-direction:column;align-items:stretch"><div class="${'en'}" style="direction:auto">${esc(qs[i][0])}</div><div class="mu">✔ ${esc(qs[i][1][qs[i][2]])}${qs[i][3]?' · '+esc(qs[i][3]):''}</div></div>`).join('')}`:''}${adviceHTML()}<div class="row" style="margin-top:12px"><button class="btn" data-x="again">${miss.length?'עוד סיבוב ←':'שוב'}</button><button class="btn g" data-go="${done[0]}" data-sub="${done[1]||''}">חזרה</button></div></div>`}
+ return `<div class="card"><h2>סיימת! 🎉</h2><p>${msg}</p><p class="mu">${ok} מתוך ${n} בניסיון הראשון${miss.length?` · ${miss.length} לחיזוק`:''}</p>${miss.length?`<div class="mu" style="margin:6px 0 2px"><b>💪 לחיזוק, כדאי לחזור על:</b></div>${miss.map(i=>`<div class="line" style="flex-direction:column;align-items:stretch"><div class="${'en'}" style="direction:auto">${esc(qs[i][0])}</div><div class="mu">✔ ${esc(qs[i][1][qs[i][2]])}${qs[i][3]?' · '+esc(qs[i][3]):''}</div></div>`).join('')}`:''}${adviceHTML()}${miss.length?`<button class="btn s" data-x="misswords" style="margin-top:8px">⭐ שמרי מילים מהשאלות לחיזוק</button>`:''}<div class="row" style="margin-top:12px"><button class="btn" data-x="again">${miss.length?'עוד סיבוב ←':'שוב'}</button><button class="btn g" data-go="${done[0]}" data-sub="${done[1]||''}">חזרה</button></div></div>`}
 let tries=0;
 document.addEventListener('click',e=>{
  const o=e.target.closest('.opt');if(o&&CUR.qs){const q=CUR.qs[V.qi],i=+o.dataset.i;if(o.classList.contains('no'))return;
@@ -143,8 +165,9 @@ document.addEventListener('click',e=>{
    else if(tries===2){$('#fb').innerHTML=`<div class="fb no">כמעט! 💡 רמז 2: ${esc(q[3]||'חפשי את הרמז בשאלה עצמה.')}</div>`}
    else{document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.i===q[2])x.classList.add('ok')});tries=0;$('#fb').innerHTML=`<div class="fb ok">התשובה הנכונה מסומנת. ${esc(q[3]||'')}<br>נחזור אליה בסוף 💪</div><button class="btn" data-x="next">${V.qi+1<CUR.qs.length?'לשאלה הבאה':'לסיום'} ←</button>`}}}
  const x=e.target.dataset.x;if(x==='prevq'&&CUR.qs&&V.qi>0){V.qi--;tries=0;render();return}
- if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){S.done[CUR.id]=1;save()}render()}
+ if(x==='next'&&CUR.qs){V.qi++;tries=0;if(V.qi>=CUR.qs.length){if(CUR.id)S.done[CUR.id]=1;logQuiz();save()}render()}
  if(x==='again'){V.qi=0;V.score=0;V.miss=new Set();tries=0;render()}
+ if(x==='misswords'){saveMissWords(CUR.qs,e.target);return}
  if(x==='lvset'){S.prof.lv=e.target.dataset.v;S.ad={ok:0,bad:0};save();e.target.closest('.fb').innerHTML='✅ עדכנתי את הרמה ל-'+S.prof.lv+'. ההמלצות יתאימו לה.'}
  if(x==='lvkeep'){S.ad={ok:0,bad:0};save();e.target.closest('.fb').remove()}});
 let CUR={};
