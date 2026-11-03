@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#2a1b5e"><title>Speak Up – אנגלית בכיף</title>
+<meta name="theme-color" content="#2a1b5e"><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="mobile-web-app-capable" content="yes"><title>Speak Up – אנגלית בכיף</title>
 <style>
 :root{--bg:#1b1240;--bg2:#2a1b5e;--card:#ffffff14;--card2:#ffffff22;--tx:#fff;--mu:#c9c1ee;--ac:#ff7ab8;--ac2:#7af0d0;--ok:#4ade80;--no:#ff6b6b;--yl:#ffd166}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -642,7 +642,7 @@ const LISTEN=[
 {id:'ls6',t:'Two friends talk about a film',lines:[['A','Did you see the new film about the mountain climber?'],['B','Yes, last night. I loved the beginning, but the ending was too sad for me.'],['A','Really? I thought the ending was the best part. It made me think about my own goals.'],['B','Maybe you are right. The actor was wonderful, and the pictures of the snow were amazing.'],['A','Let us watch it again together on Friday. I will bring the popcorn.']],
  q:[['What did Speaker B think of the ending?',['Too sad','The best part','Too short','Boring'],0,'Too sad.'],['What did Speaker A think the ending made him or her do?',['Think about their own goals','Cry','Laugh','Go climbing'],0,'It made A think about their goals.'],['What do they plan to do on Friday?',['Watch the film again','Go to the mountain','Buy tickets','Visit the actor'],0,'Watch it again together.']]}];
 let CLIPST=0;
-function sayV(text,rate,pitch){return new Promise(r=>{if(!('speechSynthesis' in window)){setTimeout(r,Math.min(6000,text.length*60));return}const u=new SpeechSynthesisUtterance(text);u.lang='en-US';if(voice)u.voice=voice;u.rate=rate||.85;u.pitch=pitch||1;u.onend=u.onerror=()=>r();try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>{try{speechSynthesis.resume()}catch(e){}speechSynthesis.speak(u)},350)})}
+function sayV(text,rate,pitch){return new Promise(r=>{if(!('speechSynthesis' in window)){setTimeout(r,Math.min(6000,text.length*60));return}const u=new SpeechSynthesisUtterance(text);u.lang='en-US';if(voice)u.voice=voice;u.rate=(rate||.85)*(typeof accSp==='function'?accSp():1);u.pitch=pitch||1;u.onend=u.onerror=()=>r();try{speechSynthesis.cancel()}catch(e){}setTimeout(()=>{try{speechSynthesis.resume()}catch(e){}speechSynthesis.speak(u)},350)})}
 async function playClip(id){const c=CLIPS.find(x=>x.id===id),tok=++CLIPST,st=$('#stage'),cap=$('#capt'),dots=$('#fdots');if(!st)return;
  for(let i=0;i<c.fr.length;i++){if(tok!==CLIPST||!$('#stage'))return;st.style.opacity=0;await new Promise(r=>setTimeout(r,250));st.textContent=c.fr[i][0];st.style.opacity=1;cap.textContent=V.subs===false?'':c.fr[i][1];if(dots)dots.textContent=c.fr.map((_,j)=>j===i?'●':'○').join(' ');await sayV(c.fr[i][1],.85);await new Promise(r=>setTimeout(r,500))}
  if(tok===CLIPST){const m=$('#cmsg');if(m)m.textContent='הסרטון נגמר. עכשיו עני על השאלות בהקלטה.'}}
@@ -700,6 +700,59 @@ LISTEN.push(
 {id:'ls12',t:'A student talks about a new school year',lines:[['A','This year is going to be different for me. I\'m starting tenth grade in a new school, because we moved to a different city. I\'m excited, but also a little afraid. I don\'t know anyone there yet. My mother says I should join a club, so I\'m thinking about the drama club. I have always wanted to try acting, and I think it is the fastest way to make friends.']],
  q:[['Why is the speaker in a new school?',['The family moved','She was asked to leave','She likes change','Her friends changed schools'],0,'They moved to a different city.'],['How does the speaker feel?',['Excited and a little afraid','Angry','Bored','Only happy'],0,'Excited but a little afraid.'],['Which club is she thinking about?',['Drama','Chess','Football','Music'],0,'The drama club.']]}
 );
+/* ---- extras: accessibility, exam study plan, parent report, install ---- */
+const ACC=()=>S.acc||{fs:0,sp:0,slow:0,calm:0};
+function accSp(){return ACC().slow?0.75:1}
+function applyAcc(){const a=ACC(),c=document.documentElement.classList;c.toggle('a-l',a.fs===1);c.toggle('a-xl',a.fs===2);c.toggle('a-sp',!!a.sp);c.toggle('a-calm',!!a.calm)}
+(function(){const st=document.createElement('style');st.textContent='.a-l body{zoom:1.12}.a-xl body{zoom:1.28}.a-sp body{line-height:1.95;letter-spacing:.03em;word-spacing:.12em}.a-sp .en{letter-spacing:.04em}.a-calm *{transition:none!important;animation:none!important}';document.head.appendChild(st);applyAcc()})();
+const _say=say;say=function(t,r){return _say(t,(r==null?.8:r)*accSp())};
+/* ---- study plan ---- */
+const PLANGO={v:['📚 אוצר מילים','bg','v'],r:['📖 קריאה','bg','r'],w:['✍️ כתיבה','bg','w'],x:['📝 מבחן','bg','x'],c:['🎬 קליפ לבעל פה','bg','s:C'],l:['🎧 האזנה','bg','s:L'],h:['💪 שאלות קשות','hard',''],t:['💡 טיפים','bg','']};
+function daysLeft(){const d=S.plan&&S.plan.date;if(!d)return null;const t=new Date(d+'T08:00:00'),n=new Date();n.setHours(8,0,0,0);return Math.round((t-n)/864e5)}
+function planGoals(dl){
+ if(dl<=7)return {ph:'שבוע אחרון: חזרה ורוגע',g:[['v','חזרה על המילים שסימנת'],['x','מבחן אחד אחרון בתנאי זמן'],['h','ריקון רשימת השאלות הקשות'],['t','קריאת טיפי הבחינה'],['l','הקלטת האזנה אחת ביום, בלי לחץ']]};
+ if(dl<=28)return {ph:'שלב סיום: בחינות מלאות',g:[['x','2 מבחנים מלאים עם שעון'],['w','חיבור אחד בתנאי זמן ובדיקה עצמית'],['h','תרגול 20 שאלות קשות'],['l','2 תרגילי האזנה'],['c','קליפ אחד לחלק ג בעל פה, עם הקלטה']]};
+ if(dl<=56)return {ph:'שלב בנייה: מבחנים וכתיבה',g:[['x','מבחן מלא אחד במודול שלך'],['w','2 חיבורים'],['v','20 מילים חדשות'],['l','2 תרגילי האזנה'],['c','קליפ אחד לחלק ג בעל פה'],['h','10 שאלות קשות']]};
+ return {ph:'שלב בסיס: מילים וקריאה',g:[['v','20 מילים חדשות'],['r','2 טקסטי קריאה'],['w','חיבור קצר אחד'],['c','קליפ אחד לחלק ג בעל פה'],['l','תרגיל האזנה אחד']]}}
+function wkKey(){const d=new Date();d.setDate(d.getDate()-d.getDay());return d.toISOString().slice(0,10)}
+function vPlan(){S.bg=S.bg||{};const dl=daysLeft(),P=S.plan||{};
+ let h=hd('התוכנית שלי לבגרות',['bg'])+`<div class="card"><b>📅 מתי הבחינה?</b><div class="mu">בחרי תאריך, ואבנה תוכנית שבועית שמתאימה לזמן שנשאר.</div><input type="date" id="pdate" value="${esc(P.date||'')}" style="margin-top:8px"><div class="row" style="margin-top:8px"><button class="btn" data-x="plansv">💾 שמירה</button>${P.date?'<button class="btn s g" data-x="plancl">מחיקה</button>':''}</div></div>`;
+ if(dl==null)return h+'<div class="mu">אחרי שמירת תאריך תופיע כאן תוכנית לשבוע הזה.</div>';
+ if(dl<0)return h+'<div class="card">התאריך כבר עבר. אפשר לבחור תאריך חדש.</div>';
+ const G=planGoals(dl),k=wkKey(),C=(P.chk=P.chk||{})[k]||[];
+ h+=`<div class="card"><b>${dl===0?'הבחינה היום! בהצלחה 🍀':'נשארו '+dl+' ימים ('+Math.ceil(dl/7)+' שבועות)'}</b><div class="mu">${G.ph}</div><div class="bar" style="margin:8px 0"><i style="width:${Math.round(C.length/G.g.length*100)}%"></i></div></div><div class="card"><b>המשימות לשבוע הזה</b>`;
+ G.g.forEach((x,i)=>{const go=PLANGO[x[0]],on=C.includes(i);h+=`<div class="line" style="display:flex;gap:8px;align-items:center;margin:8px 0"><button class="btn s ${on?'':'g'}" data-x="planck" data-i="${i}" aria-label="סימון">${on?'✅':'⬜'}</button><span style="flex:1">${esc(x[1])}</span><button class="btn s g" data-go="${go[1]}" data-sub="${go[2]}">${go[0]}</button></div>`});
+ h+=`</div><div class="card"><b>📲 שיתוף התקדמות</b><div class="mu">שליחת סיכום קצר להורים.</div>${parentBtns()}</div>`;return h}
+function planCard(){const dl=daysLeft();if(dl==null||dl<0)return `<div class="card"><b>🎯 תוכנית לבגרות</b><div class="mu">הוסיפי תאריך בחינה וקבלי משימות שבועיות.</div><button class="btn s" data-go="bg" data-sub="plan">בניית תוכנית</button></div>`;
+ const G=planGoals(dl),C=((S.plan.chk||{})[wkKey()]||[]);return `<div class="card"><b>🎯 ${dl===0?'הבחינה היום':'עד הבחינה: '+dl+' ימים'}</b><div class="mu">${G.ph} · ${C.length} מתוך ${G.g.length} משימות השבוע</div><div class="bar" style="margin:8px 0"><i style="width:${Math.round(C.length/G.g.length*100)}%"></i></div><button class="btn s" data-go="bg" data-sub="plan">פתיחת התוכנית</button></div>`}
+/* ---- parent report ---- */
+function parentText(){const p=S.prof||{},w=weekStats(),nm=p.name||'התלמיד/ה',acc=w.total?Math.round(w.ok/w.total*100):0,dl=daysLeft(),ex=S.bg&&S.bg.x?Object.keys(S.bg.x).length:0;
+ let t=`📘 סיכום שבועי מ-Speak Up: ${nm}\n`;
+ t+=w.runs?`• ${w.runs} תרגולים השבוע, ${w.total} שאלות, ${acc}% נכון\n`:`• השבוע עוד לא היו תרגולים\n`;
+ t+=`• רצף ימים: ${S.streak} · נקודות: ${S.xp}\n• מילים שנשמרו: ${Object.keys(S.words||{}).length}\n`;
+ if(w.strong.length)t+=`• חזק ב: ${w.strong.map(b=>b.lab).join(', ')}\n`;
+ if(w.weak.length)t+=`• לחזק: ${w.weak.map(b=>b.lab).join(', ')}\n`;
+ if(ex)t+=`• מבחני בגרות שהושלמו: ${ex}\n`;
+ if(dl!=null&&dl>=0)t+=`• ימים עד הבחינה: ${dl}\n`;
+ return t.trim()}
+function parentBtns(){return `<div class="row" style="flex-wrap:wrap;margin-top:6px"><button class="btn s" data-x="pwa">📲 וואטסאפ</button><button class="btn s g" data-x="pcopy">📋 העתקה</button></div><pre id="ptxt" class="mu" style="white-space:pre-wrap;margin-top:8px">${esc(parentText())}</pre>`}
+/* ---- wrappers ---- */
+const _vBg=vBg;vBg=function(){if(V.sub==='plan')return vPlan();let h=_vBg();return V.sub?h:h+planCard()};
+const _weekCard=weekCard;weekCard=function(){return _weekCard()+planCard()};
+const _vProf=vProf;vProf=function(){const a=ACC(),ch=(k,v,l)=>`<button class="btn s ${a[k]===v?'':'g'}" data-x="acc" data-k="${k}" data-v="${v}">${l}</button>`;
+ return _vProf()+`<div class="card"><b>♿ נוחות קריאה</b><div class="mu">גודל טקסט</div><div class="row" style="flex-wrap:wrap">${ch('fs',0,'רגיל')}${ch('fs',1,'גדול')}${ch('fs',2,'גדול מאוד')}</div><div class="mu" style="margin-top:8px">ריווח (מתאים לקריאה קשה)</div><div class="row">${ch('sp',0,'רגיל')}${ch('sp',1,'מרווח')}</div><div class="mu" style="margin-top:8px">מהירות הקראה</div><div class="row">${ch('slow',0,'רגילה')}${ch('slow',1,'איטית')}</div><div class="mu" style="margin-top:8px">תנועה במסך</div><div class="row">${ch('calm',0,'רגילה')}${ch('calm',1,'מופחתת')}</div></div>
+ <div class="card"><b>📲 סיכום להורים</b>${parentBtns()}</div><div class="card"><b>📱 התקנה כאפליקציה</b><div class="mu">באנדרואיד: לחצי על הכפתור. באייפון: כפתור השיתוף ← "הוספה למסך הבית".</div><button class="btn s" data-x="inst" id="instb" ${window._ip?'':'style="display:none"'}>התקנה</button></div>`};
+const _vHome=vHome;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-x]');if(!t)return;const x=t.dataset.x;
+ if(x==='acc'){S.acc=Object.assign({fs:0,sp:0,slow:0,calm:0},S.acc);S.acc[t.dataset.k]=+t.dataset.v;save();applyAcc();render()}
+ if(x==='plansv'){const v=$('#pdate').value;if(v){S.plan=Object.assign(S.plan||{},{date:v});save();render()}}
+ if(x==='plancl'){delete S.plan;save();render()}
+ if(x==='planck'){S.plan=S.plan||{};const k=wkKey(),c=(S.plan.chk=S.plan.chk||{})[k]||(S.plan.chk[k]=[]),i=+t.dataset.i,j=c.indexOf(i);j<0?c.push(i):c.splice(j,1);save();render()}
+ if(x==='pwa'){window.open('https://wa.me/?text='+encodeURIComponent(parentText()),'_blank')}
+ if(x==='pcopy'){try{navigator.clipboard.writeText(parentText());t.textContent='✔ הועתק'}catch(_){}}
+ if(x==='inst'&&window._ip){window._ip.prompt();window._ip=null}});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window._ip=e;const b=$('#instb');if(b)b.style.display=''});
+try{if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js')}catch(e){}
 
 /* ---- cloze generator ---- */
 const STOP=new Set('about after again also always because before being between could every first found from have into just know like little made many more most much must never only other over said same should since some still such than that their them then there these they this those through very want were what when where which while will with would your'.split(' '));
